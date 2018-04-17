@@ -1,0 +1,175 @@
+import pandas as pd
+import numpy as np
+import numpy.matlib
+import matplotlib.pylab as plt 
+from scipy.spatial.distance import cdist
+from numpy import array, zeros, argmin, inf, equal, ndim
+import os
+import random
+import ipdb 
+
+#for synthetic traj generation
+def fastdtw(x, y, dist):
+    assert len(x)
+    assert len(y)
+    if ndim(x)==1:
+        x = x.reshape(-1,1)
+    if ndim(y)==1:
+        y = y.reshape(-1,1)
+    r, c = len(x), len(y)
+    D0 = zeros((r + 1, c + 1))
+    D0[0, 1:] = inf
+    D0[1:, 0] = inf
+    D1 = D0[1:, 1:]
+    D0[1:,1:] = cdist(x,y,dist)
+    C = D1.copy()
+    for i in range(r):
+        for j in range(c):
+            D1[i, j] += min(D0[i, j], D0[i, j+1], D0[i+1, j])
+    if len(x)==1:
+        path = zeros(len(y)), range(len(y))
+    elif len(y) == 1:
+        path = range(len(x)), zeros(len(x))
+    else:
+        path = _traceback(D0)
+    mindis = D1[-1, -1] / sum(D1.shape)
+    return mindis
+
+def _traceback(D):
+    i, j = array(D.shape) - 2
+    p, q = [i], [j]
+    while ((i > 0) or (j > 0)):
+        tb = argmin((D[i, j], D[i, j+1], D[i+1, j]))
+        if (tb == 0):
+            i -= 1
+            j -= 1
+        elif (tb == 1):
+            i -= 1
+        else: # (tb == 2):
+            j -= 1
+        p.insert(0, i)
+        q.insert(0, j)
+    return array(p), array(q)
+
+def _plot(traj, synthetic_data):
+    fig = plt.figure()
+    ax = fig.add_subplot(111)
+    ax.plot(traj[:,1:].tolist(), color='gold', label='original data')
+    for i in range(len(synthetic_data)):
+        ax.plot(synthetic_data[i].tolist(), linestyle="dashed", color='gray', label='synthetic_traj')
+    ax.legend()
+    fig.show()    
+    
+def mean(L):
+    return sum(L)/len(L)
+
+# Returns list of J maximum entropy bootstrap samples of time-series L
+def meboot(L): 
+    N = len(L)
+    L_sort = sorted((e,i) for i,e in enumerate(L))
+    L_vals = [l[0] for l in L_sort]
+    L_inds = [l[1] for l in L_sort]
+    L_out = []
+    Z = [(L_vals[i] + L_vals[i+1])/2 for i in range(N-1)]
+    m_trm = mean([abs(L[i] - L[i-1]) for i in range(1, N)])
+    Z = [L_vals[0] - m_trm] + Z + [L_vals[-1] + m_trm]
+    m = [0]*N
+    m[0] = 0.75*L_vals[0] + 0.25*L_vals[1]
+    for k in range(1, N-1):
+        m[k] = 0.25*L_vals[k-1] + 0.5*L_vals[k] + 0.25*L_vals[k+1]
+    m[-1] = 0.25*L_vals[-2] + 0.75*L_vals[-1]
+    U = sorted([random.random() for _ in range(N)])
+    quantiles = [0]*N
+    x = [float(y)/N for y in range(N+1)]
+    for k in range(N):
+        ind = min(range(len(x)), key=lambda i: abs(x[i] - U[k]))
+        if x[ind] > U[k]:
+            ind -= 1
+        c = (2*m[ind] - Z[ind] - Z[ind + 1]) / 2
+        y0 = Z[ind] + c
+        y1 = Z[ind + 1] + c
+        quantiles[k] = y0 + (U[k] - x[ind]) * \
+                        (y1 - y0) / (x[ind + 1] - x[ind])
+    L_out = [x for y, x in sorted(zip(L_inds, quantiles))]
+    return L_out
+
+
+def run_finite_differece_matrix(df, num_data, csv_save_path):
+    dis_thresthod = 2.0
+    traj = df.values
+    interested_data_fields = df.columns.values
+    N,D = traj.shape
+    A   = np.eye(N)
+    x   = np.eye(N, k=-1)*-2.0
+    A   = A + x
+    x   = np.eye(N, k=-2) 
+    A   = A + x
+    _row = np.append([np.zeros(N-2)],[1, -2])
+    A = np.vstack([A, _row])
+    _row = np.append([np.zeros(N-1)],[1])
+    A = np.vstack([A, _row])
+    R_1 = np.linalg.inv(np.dot(A.T, A))
+    y = np.amax(R_1, axis=0)
+    y = np.matlib.repmat(y, N, 1)
+    M = np.divide(R_1, y) * (1.0/N)
+
+    traj_results = []
+    synthetic_data = []
+    for ind_D in range(num_data):
+        theta = traj
+        theta_k = np.random.multivariate_normal(np.zeros(N), R_1, D).T
+        test_traj = theta + theta_k
+        while fastdtw(test_traj, theta, dist=lambda x, y: np.linalg.norm(x - y, ord=1)) > dis_thresthod:
+            print('.\n')
+            theta_k = np.dot(M, theta_k)
+            test_traj = theta + theta_k
+        synthetic_traj = theta + theta_k
+        df = pd.DataFrame(synthetic_traj.tolist(), columns=interested_data_fields)
+        df.to_csv(os.path.join(csv_save_path, 'synthetic_' + str(ind_D) + '.csv'))
+        synthetic_data.append(synthetic_traj)
+    #plot 
+#    _plot(traj, synthetic_data)
+
+#plot the partical autocorrelation for each dimension
+def _plot_PACF(x):
+    from statsmodels.graphics.tsaplots import plot_pacf
+    plot_pacf(x)
+    
+
+def run_bootstrap(df, num_data, csv_save_path):
+    traj = df.values
+    interested_data_fields = df.columns.values
+    _,D = traj.shape
+    synthetic_data = []
+    metric = '_maximum_entropy'
+    for idata in range(num_data):
+        synthetic_traj = []
+
+        if metric == '_maximum_entropy':
+            for idim in range(D):
+                L = traj[:,idim]
+    #            if idata == 0:
+    #                _plot_PACF(L)
+                L_out = meboot(L)
+                synthetic_traj.append(L_out)
+            synthetic_traj = np.array(synthetic_traj).T
+
+        elif metric == '_stationary':
+            from arch.bootstrap import IIDBootstrap
+            bs = IIDBootstrap()
+
+        elif metric == '_circular_block':
+
+        else :
+            print 'sorry! without this metric for generating synthetic data, plese check!'
+            pass 
+
+        df = pd.DataFrame(synthetic_traj.tolist(), columns=interested_data_fields)
+        df.to_csv(os.path.join(csv_save_path, 'synthetic_' + str(idata) + '.csv'))
+        synthetic_data.append(synthetic_traj)
+
+    #plot 
+    _plot(traj, synthetic_data)
+        
+            
+    

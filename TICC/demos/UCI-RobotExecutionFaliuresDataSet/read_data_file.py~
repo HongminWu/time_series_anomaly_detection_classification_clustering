@@ -1,0 +1,27 @@
+import numpy as np
+import ipdb
+import csv
+
+txt_file = "lp1.txt"
+fp = open(txt_file)
+cnt = 1
+labels = []
+ddict  = {}
+line = 'init'
+while line:
+    line   = fp.readline()
+    label = line.strip()
+    labels.append(label)
+    array = []
+    for i in range(0, 15):
+        print("Line {}: {}".format(cnt, line.strip()))
+        cnt += 1
+        line = fp.readline()
+        array.append(map(float, line.strip('\t\n').replace('\t',',').split(',')))
+    if label in labels:
+        ddict[label] = np.concatenate((np.array(ddict[label], np.array(array), axis=0)
+    ddict[label] = array
+    line = fp.readline()
+    line = fp.readline()
+    print ddict
+    ipdb.set_trace()

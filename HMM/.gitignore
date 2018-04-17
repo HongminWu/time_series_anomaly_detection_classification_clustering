@@ -1,0 +1,4 @@
+*.pyc
+.*.swp
+kitting_experiment_data/
+hmm_for_baxter_using_only_success_trials/experiment_scripts/experiment_output

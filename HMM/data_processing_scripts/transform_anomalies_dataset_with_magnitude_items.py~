@@ -1,0 +1,22 @@
+import os
+import pandas as pd
+import numpy as np
+import ipdb
+
+if __name__ == "__main__":
+    from optparse import OptionParser
+    usage = "usage: %prog -d base_folder_path"
+    parser = OptionParser(usage=usage)
+
+    parser.add_option("-d", "--base-folder",
+        action="store", type="string", dest="base_folder",
+        help="provide a base folder which will have this structure: \
+            ./01, ./01/*.csv, ./02, ./02/*.csv, ...")
+
+    if options.base_folder is None:
+        parser.error("no base_folder, please add -d dir or -h for detailed help")
+    else:
+        base_folder = options.base_folder
+
+    files = os.listdir(base_folder)
+    df_group_by_foldername = load_data_folder.run(base_folder)    

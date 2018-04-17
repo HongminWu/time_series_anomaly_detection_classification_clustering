@@ -1,0 +1,30 @@
+'''
+@HongminWu April, 16, 2018
+function: evaluate the perfermance of data augumentation methods;
+The implementatiing steps:
+0. load the dataset and split it into training(20%) and testing(80%) 
+1. training the model with variable data augumation parameters
+2. testing the identification accuracy w.r.t the trained model
+'''
+import os, sys
+import training_config
+from sklearn.externals import joblib
+import util
+import ipdb
+
+def load_dataset():
+    path = os.path.join(training_config.anomaly_data_path, 'anomalies', 'TOOL_COLLISION')
+    anomaly_data_group_by_folder_name = util.get_anomaly_data_for_labelled_case(training_config, path)
+    data_in_list = []
+    for filename in anomaly_data_group_by_folder_name:
+        data_in_list.append(anomaly_data_group_by_folder_name[filename][1])
+    return data_in_list
+
+def run():
+    dataset = load_dataset()
+    test_idx = int(0.8 * len(dataset))
+    for idx in range(len(dataset))
+
+        
+if __name__=="__main__":
+    sys.exit(run())

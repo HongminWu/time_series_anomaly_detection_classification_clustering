@@ -1,0 +1,9 @@
+*.png
+*.eps
+*.pkl
+*.pyc
+*.zip
+*.txt
+*.npy
+/dataset
+/dataset_releases_MLSTM

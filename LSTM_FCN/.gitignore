@@ -1,0 +1,6 @@
+data/*
+!data/note.md
+weights/*.h5
+weights/*/*.h5
+.idea/
+utils/*.pyc
