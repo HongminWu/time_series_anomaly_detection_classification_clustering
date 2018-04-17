@@ -53,8 +53,6 @@ def run(model_save_path,
 
     for state_no in range(1, state_amount+1):
         model_list = []
-        model_generator = model_generation.get_model_generator(model_type, model_config)
-
         train_data = training_data_group_by_state[state_no]
         lengths    = training_length_array_group_by_state[state_no]
         best_model, model_id = train_hmm_model(train_data, lengths)

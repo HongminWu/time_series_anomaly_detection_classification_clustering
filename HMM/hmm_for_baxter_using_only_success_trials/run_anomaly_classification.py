@@ -34,6 +34,7 @@ def train_model(x_train, y_train, class_names):
                 data_tempt = np.concatenate((data_tempt, train_data[i]), axis=0)
         train_data = data_tempt
         best_model, model_id = hmm_model_training.train_hmm_model(train_data, lengths)
+        ipdb.set_trace()
         anomaly_model_path = os.path.join(training_config.anomaly_model_save_path, 
                                                    model_name, 
                                                    training_config.config_by_user['data_type_chosen'], 

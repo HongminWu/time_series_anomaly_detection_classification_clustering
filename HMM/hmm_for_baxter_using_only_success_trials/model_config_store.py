@@ -72,9 +72,9 @@ model_store = {
   
 
     'BNPY\'s HMM': {
-        'use': 'default',
+        'use': 'gauss',
         'config_set': {
-            'default': {
+            'ar': {
                 'hmm_max_train_iteration': 1000,
                 'hmm_hidden_state_amount': 5,
                 'alloModel' : 'HDPHMM',     
@@ -86,7 +86,7 @@ model_store = {
             
             'gauss': {
                 'hmm_max_train_iteration': 1000,
-                'hmm_hidden_state_amount': 10,
+                'hmm_hidden_state_amount': 5,
                 'alloModel' : 'HDPHMM',     
                 'obsModel'  : ['DiagGauss'],  
                 'ECovMat'   : ['covdata'],

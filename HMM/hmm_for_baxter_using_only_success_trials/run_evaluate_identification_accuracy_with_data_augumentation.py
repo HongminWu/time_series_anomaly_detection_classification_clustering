@@ -34,10 +34,11 @@ def load_dataset(testing_ratio=0.8):
     return x_train, x_test
 
 def run():
+    # load the dataset
     output_dir = os.path.join(training_config.anomaly_data_path, 'synthetic_data')
     if not os.path.isdir(output_dir):
         os.makedirs(output_dir)
-    x_train, x_test = load_dataset(testing_ratio=0.9)
+    x_train, x_test = load_dataset(testing_ratio=0.8)
     
     # calculate the threshold for identification based on real training trials
     print 'calculate the threshold for identification based on real training trials'
@@ -66,9 +67,13 @@ def run():
     threshold_c = 2
     threshold_for_log_likelihood  = (np_matrix_of_all_log_curves.mean(0) - threshold_c * np_matrix_of_all_log_curves.std(0)).tolist()[0]
 
+
+    generate_synthetic_data.run_sampling_from_trained_hmm_model(best_model['model'], num_data = 10, csv_save_path = output_dir, trial_name = 'real')
+
+    
     # train the model with data augmentation and test it
     print "train the model with data augmentation and test it"
-    num_data_list = range(2, 20, 2)
+    num_data_list = range(2, 10, 2)
     acc_list      = []
     for num_data in num_data_list:
         old_files = glob.glob(os.path.join(output_dir, '*'))
@@ -78,6 +83,7 @@ def run():
             df = pd.DataFrame(x_train[i], columns=training_config.interested_data_fields)
             df.to_csv(os.path.join(output_dir, 'real_' + str(i) + '.csv'))
             generate_synthetic_data.run_finite_differece_matrix(df=df, num_data = num_data, csv_save_path=output_dir, trial_name='real_'+str(i))
+#            generate_synthetic_data.run_bootstrap(df=df, num_data = num_data, csv_save_path=output_dir, trial_name='real_'+str(i))
         anomaly_data_group_by_folder_name = util.get_anomaly_data_for_labelled_case(training_config, output_dir)
         list_of_trials = anomaly_data_group_by_folder_name.values()
         lengths = []

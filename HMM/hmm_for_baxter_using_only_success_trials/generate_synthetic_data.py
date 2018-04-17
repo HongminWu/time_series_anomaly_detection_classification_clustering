@@ -52,13 +52,13 @@ def _traceback(D):
     return array(p), array(q)
 
 def _plot(traj, synthetic_data):
-    fig = plt.figure()
-    ax = fig.add_subplot(111)
-    ax.plot(traj[:,1:].tolist(), color='gold', label='original data')
+    plt.figure()
+    plt.plot(traj.tolist(), color='gold', label='original data')
     for i in range(len(synthetic_data)):
-        ax.plot(synthetic_data[i].tolist(), linestyle="dashed", color='gray', label='synthetic_traj')
-    ax.legend()
-    fig.show()
+        plt.plot(synthetic_data[i].tolist(), linestyle="dashed", color='gray', label='synthetic_traj')
+    plt.legend()
+    plt.show()
+    ipdb.set_trace()
 
 def mean(L):
     return sum(L)/len(L)
@@ -92,7 +92,6 @@ def meboot(L):
                         (y1 - y0) / (x[ind + 1] - x[ind])
     L_out = [x for y, x in sorted(zip(L_inds, quantiles))]
     return L_out
-
 
 def run_finite_differece_matrix(df, num_data, csv_save_path, trial_name):
     dis_thresthod = 2.0
@@ -129,15 +128,12 @@ def run_finite_differece_matrix(df, num_data, csv_save_path, trial_name):
 #    plot
 #    _plot(traj, synthetic_data)
 
-'''
-
 # plot the partical autocorrelation for each dimension
 def _plot_PACF(x):
     from statsmodels.graphics.tsaplots import plot_pacf
     plot_pacf(x)
 
-
-def run_bootstrap(df, num_data, csv_save_path):
+def run_bootstrap(df, num_data, csv_save_path, trial_name):
     traj = df.values
     interested_data_fields = df.columns.values
     _,D = traj.shape
@@ -154,14 +150,25 @@ def run_bootstrap(df, num_data, csv_save_path):
                 synthetic_traj.append(L_out)
             synthetic_traj = np.array(synthetic_traj).T
         elif metric == '_stationary':
+            pass
         elif metric == '_circular_block':
+            pass
         else :
             print 'sorry! without this metric for generating synthetic data, plese check!'
             pass
         df = pd.DataFrame(synthetic_traj.tolist(), columns=interested_data_fields)
-        df.to_csv(os.path.join(csv_save_path, 'synthetic_' + str(idata) + '.csv'))
+        df.to_csv(os.path.join(csv_save_path, trial_name + '_syn_' + str(idata) + '.csv'))
         synthetic_data.append(synthetic_traj)
+#    plot
+#    _plot(traj, synthetic_data)
 
-# plot
-    _plot(traj, synthetic_data)
-'''
+def run_sampling_from_trained_hmm_model(model, num_data, csv_save_path, trial_name):
+    from hmmlearn import hmm
+    ipdb.set_trace()
+    '''
+    startprob = model.log_startprob
+    transmat  = model.log_transmat
+    means_of_each_component =
+    cov_of_each_component = 
+    print model
+    '''
