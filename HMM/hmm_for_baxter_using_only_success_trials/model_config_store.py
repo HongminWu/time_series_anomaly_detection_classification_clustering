@@ -3,13 +3,13 @@ model_store = {
         'use': 'default',
         'config_set': {
             'default': {
-                'hmm_max_train_iteration': 10000,
+                'hmm_max_train_iteration': 1000,
                 'hmm_hidden_state_amount': 5,
                 'gaussianhmm_covariance_type_string': 'diag',
             },
             'c1': {
-                'hmm_max_train_iteration': 100000,
-                'hmm_max_hidden_state_amount': 100,
+                'hmm_max_train_iteration': 1000,
+                'hmm_max_hidden_state_amount': 5,
                 'gaussianhmm_covariance_type_string': ['diag', 'spherical', 'full', 'tied'],
             },
             'c1_less_iter': {
@@ -72,7 +72,7 @@ model_store = {
   
 
     'BNPY\'s HMM': {
-        'use': 'gauss',
+        'use': 'diag',
         'config_set': {
             'ar': {
                 'hmm_max_train_iteration': 1000,
@@ -84,7 +84,7 @@ model_store = {
                 'varMethod' : 'memoVB',
             },
             
-            'gauss': {
+            'diag': {
                 'hmm_max_train_iteration': 1000,
                 'hmm_hidden_state_amount': 5,
                 'alloModel' : 'HDPHMM',     
@@ -94,13 +94,13 @@ model_store = {
             },
 
 
-            'auto': {
+            'gauss': {
                 'hmm_max_train_iteration': 10000,
-                'hmm_max_hidden_state_amount': 20,
+                'hmm_max_hidden_state_amount': 5,
                 'alloModel' : 'HDPHMM',     
-                'obsModel'  : ['Gauss', 'DiagGauss', 'ZeroMeanGauss'],
-                'ECovMat'   : ['eye', 'covdata', 'diagcovdata'],
-                'varMethod' : ['moVB', 'memoVB', 'VB'],
+                'obsModel'  : ['Gauss'],
+                'ECovMat'   : ['covdata'],
+                'varMethod' : ['memoVB'],
             },
         }
     },

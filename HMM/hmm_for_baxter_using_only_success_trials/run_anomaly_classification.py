@@ -34,7 +34,6 @@ def train_model(x_train, y_train, class_names):
                 data_tempt = np.concatenate((data_tempt, train_data[i]), axis=0)
         train_data = data_tempt
         best_model, model_id = hmm_model_training.train_hmm_model(train_data, lengths)
-        ipdb.set_trace()
         anomaly_model_path = os.path.join(training_config.anomaly_model_save_path, 
                                                    model_name, 
                                                    training_config.config_by_user['data_type_chosen'], 
@@ -49,11 +48,12 @@ def train_model(x_train, y_train, class_names):
         )
         
         model = best_model['model']
-        zhidden = model.decode(train_data, lengths=lengths)
+        _, zhidden = model.decode(train_data, lengths=lengths)
         zhat = []
         trial_len = len(zhidden) / len(indices)
         for iTrial in range(len(indices)):
             zseq = zhidden[iTrial * trial_len : (iTrial + 1) * trial_len]
+#            model.show_single_sequence(iTrial, zseq) # only for bnpy model
             zhat.append(zseq.tolist() + [zseq[-1]])
         zdf = pd.DataFrame(zhat)
         zdf.to_csv(anomaly_model_path + '/zhat.csv', index = False)        
@@ -157,7 +157,7 @@ class MLPClassifierHiddenSeq():
                 print 'hidden state sequence of  %s not found'%(fo,)
                 raw_input("sorry! cann't load the hidden state sequence")
                 sys.exit()
-        MLPclf = MLPClassifier(solver='sgd', alpha=1e-5, tol=1e-9, hidden_layer_sizes = (100,100,100), max_iter = 1000, random_state = 1)
+        MLPclf = MLPClassifier(solver='sgd', alpha=1e-5, tol=1e-9, hidden_layer_sizes = (10,10,10), max_iter = 100000, random_state = 1)
         MLPclf.fit(x_train, y_train)
         self.MLPclf = MLPclf
 
@@ -179,12 +179,12 @@ class MLPClassifierHiddenSeq():
         for i in range(x_test.shape[0]):
             all_zhat_for_one_test = []
             for f in class_names:
-                zhat = anomaly_model_group_by_label[f].decode(x_test[i], lengths=len(x_test[i])-1)
+                _, zhat = anomaly_model_group_by_label[f].decode(x_test[i], lengths=len(x_test[i])-1)
                 zhat_plus = zhat.tolist() + [zhat[-1]]
                 all_zhat_for_one_test.append(zhat_plus)
-#            print self.MLPclf.predict_log_proba(all_zhat_for_one_test)
-#            max_in_row = np.amax(self.MLPclf.predict_proba(all_zhat_for_one_test), axis = 1)
-#            y_pred.append(np.argmax(max_in_row))
+            max_in_row = np.amax(self.MLPclf.predict_proba(all_zhat_for_one_test), axis = 1)
+            y_pred.append(np.argmax(max_in_row))
+        return y_pred
 
 def run():
     # load the train/test/labels file
@@ -226,7 +226,7 @@ def run():
     elif CLASSIFIER_TYPE == 'MLPClassifierHiddenSeq':
         # for confusion matrix
         classifier = MLPClassifierHiddenSeq()
-        classifier.fit(x_train,class_names)
+        classifier.fit(class_names)
         y_pred = classifier.predict(x_test, class_names)
         plot_confusion_matrix.run( y_test, y_pred, class_names)
     else:

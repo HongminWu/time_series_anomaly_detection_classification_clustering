@@ -4,8 +4,9 @@ import numpy.matlib
 import matplotlib.pylab as plt
 from scipy.spatial.distance import cdist
 from numpy import array, zeros, argmin, inf, equal, ndim
-import os
+import os, sys
 import random
+import training_config
 import ipdb
 
 #for synthetic traj generation
@@ -51,15 +52,20 @@ def _traceback(D):
         q.insert(0, j)
     return array(p), array(q)
 
-def _plot(traj, synthetic_data):
+def _plot(synthetic_data, traj = None):
     plt.figure()
-    plt.plot(traj.tolist(), color='gold', label='original data')
+    if traj is not None:
+        plt.plot(traj.tolist(), color='gold', label='original data')
     for i in range(len(synthetic_data)):
         plt.plot(synthetic_data[i].tolist(), linestyle="dashed", color='gray', label='synthetic_traj')
     plt.legend()
     plt.show()
-    ipdb.set_trace()
 
+# plot the partical autocorrelation for each dimension
+def _plot_PACF(x):
+    from statsmodels.graphics.tsaplots import plot_pacf
+    plot_pacf(x)
+    
 def mean(L):
     return sum(L)/len(L)
 
@@ -126,12 +132,8 @@ def run_finite_differece_matrix(df, num_data, csv_save_path, trial_name):
         df.to_csv(os.path.join(csv_save_path, trial_name + '_syn_' + str(ind_D) + '.csv'))
         synthetic_data.append(synthetic_traj)
 #    plot
-#    _plot(traj, synthetic_data)
+#    _plot(synthetic_data,traj)
 
-# plot the partical autocorrelation for each dimension
-def _plot_PACF(x):
-    from statsmodels.graphics.tsaplots import plot_pacf
-    plot_pacf(x)
 
 def run_bootstrap(df, num_data, csv_save_path, trial_name):
     traj = df.values
@@ -160,15 +162,50 @@ def run_bootstrap(df, num_data, csv_save_path, trial_name):
         df.to_csv(os.path.join(csv_save_path, trial_name + '_syn_' + str(idata) + '.csv'))
         synthetic_data.append(synthetic_traj)
 #    plot
-#    _plot(traj, synthetic_data)
+#    _plot(synthetic_data, traj)
 
-def run_sampling_from_trained_hmm_model(model, num_data, csv_save_path, trial_name):
-    from hmmlearn import hmm
-    ipdb.set_trace()
-    '''
-    startprob = model.log_startprob
-    transmat  = model.log_transmat
-    means_of_each_component =
-    cov_of_each_component = 
-    print model
-    '''
+def run_sampling_from_trained_hmm_model(df, model, num_data, csv_save_path, trial_name):
+    model_type = training_config.config_by_user['model_type_chosen']
+    if model_type not in ['hmmlearn\'s HMM', 'hmmlearn\'s GMMHMM']:
+        print "sorry, we can't sample from the defined model_type:%s"%model_type
+        sys.exit()
+    print 
+    print model_type
+    interested_data_fields = df.columns.values
+    traj = df.values
+    synthetic_data = []    
+    for idx in range(num_data):
+        x, z = model.sample(traj.shape[0])
+        xdf = pd.DataFrame(x, columns=interested_data_fields)
+        xdf.to_csv(os.path.join(csv_save_path, trial_name + '_syn_' + str(idx) + '.csv'))        
+        synthetic_data.append(x)
+#    _plot(synthetic_data, traj)        
+#    print model
+
+def cross_signals_difference_with_weights(x_train, total_num_data, csv_save_path, trial_name):
+    from itertools import combinations
+    comb = combinations(x_train, 2)
+    cross_diff_list = []
+    for i in list(comb):
+        cross_diff_list.append(np.subtract(i[0], i[1]))
+
+    for i in range(len(x_train)):
+        if i == 0:
+            temp_mean = x_train[i]
+        else:
+            temp_mean = np.add(temp_mean, x_train[i])
+        # mean
+        if i == len(x_train) - 1:
+            temp_mean = temp_mean / float(len(x_train))
+
+    synthetic_data = []
+    for n in range(total_num_data):
+        weights = np.random.dirichlet(np.ones(len(cross_diff_list)), size=1)
+        for i, iw in enumerate(weights[0]):
+           if i == 0:
+               temp_with_weights = iw * cross_diff_list[i]
+           else:
+               temp_with_weights +=  iw * cross_diff_list[i]
+        syn_data = temp_with_weights + temp_mean
+        synthetic_data.append(syn_data)
+        _plot(synthetic_data, x_train[0])

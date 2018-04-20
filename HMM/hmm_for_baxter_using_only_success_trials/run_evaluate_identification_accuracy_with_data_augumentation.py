@@ -38,73 +38,103 @@ def run():
     output_dir = os.path.join(training_config.anomaly_data_path, 'synthetic_data')
     if not os.path.isdir(output_dir):
         os.makedirs(output_dir)
-    x_train, x_test = load_dataset(testing_ratio=0.8)
-    
-    # calculate the threshold for identification based on real training trials
-    print 'calculate the threshold for identification based on real training trials'
-    lengths = []
-    for idx in range(len(x_train)):
-        lengths.append(x_train[idx].shape[0])
-        if idx == 0:
-            train_data = x_train[idx]
-        else:
-            train_data = np.concatenate((train_data, x_train[idx]), axis=0)
-    best_model, model_id = hmm_model_training.train_hmm_model(train_data, lengths)
-    all_log_curves = []
-    for itrial in range(len(x_train)):
-        one_log_curve = util.fast_log_curve_calculation(x_train[itrial], best_model['model'])
-        all_log_curves.append(one_log_curve)
-    np_matrix_of_all_log_curves = np.matrix(all_log_curves)
-    plt.figure()
-    plt.subplot(211)
-    plt.title('All log likelihood curves and calculated threshold')
-    for no in range(np_matrix_of_all_log_curves.shape[0]):
-        plt.plot(np_matrix_of_all_log_curves[no].tolist()[0], linestyle='--', color='gray', label = 'testing_trial')
-    colors = iter(cm.rainbow(np.linspace(0,1,5)))
-    for c in np.arange(0, 10, 2):
-        plt.plot((np_matrix_of_all_log_curves.mean(0) - c * np_matrix_of_all_log_curves.std(0)).tolist()[0], label = 'mean-%s*std' %(c,), linestyle='solid', color = next(colors))
-    plt.legend(loc='best')
-    threshold_c = 2
-    threshold_for_log_likelihood  = (np_matrix_of_all_log_curves.mean(0) - threshold_c * np_matrix_of_all_log_curves.std(0)).tolist()[0]
 
+    plt.subplot(111)
+    testing_ratio_list = np.arange(0.9, 0.4, -0.1)
+    num_syn_data_list = range(2, 22, 2)
+    for testing_ratio in testing_ratio_list:
+        x_train, x_test = load_dataset(testing_ratio=testing_ratio)
+        n_real = len(x_train)
 
-    generate_synthetic_data.run_sampling_from_trained_hmm_model(best_model['model'], num_data = 10, csv_save_path = output_dir, trial_name = 'real')
-
-    
-    # train the model with data augmentation and test it
-    print "train the model with data augmentation and test it"
-    num_data_list = range(2, 10, 2)
-    acc_list      = []
-    for num_data in num_data_list:
-        old_files = glob.glob(os.path.join(output_dir, '*'))
-        for old_file in old_files: os.remove(old_file)
-        for i in range(len(x_train)):
-            print ('Generating synthetic data from real_{0}'.format(i))
-            df = pd.DataFrame(x_train[i], columns=training_config.interested_data_fields)
-            df.to_csv(os.path.join(output_dir, 'real_' + str(i) + '.csv'))
-            generate_synthetic_data.run_finite_differece_matrix(df=df, num_data = num_data, csv_save_path=output_dir, trial_name='real_'+str(i))
-#            generate_synthetic_data.run_bootstrap(df=df, num_data = num_data, csv_save_path=output_dir, trial_name='real_'+str(i))
-        anomaly_data_group_by_folder_name = util.get_anomaly_data_for_labelled_case(training_config, output_dir)
-        list_of_trials = anomaly_data_group_by_folder_name.values()
+        # calculate the threshold for identification based on real training trials
+        print 'calculate the threshold for identification based on real training trials'
         lengths = []
-        for idx in range(len(list_of_trials)):
-            lengths.append(list_of_trials[idx][1].shape[0])
+        for idx in range(len(x_train)):
+            lengths.append(x_train[idx].shape[0])
             if idx == 0:
-                train_data = list_of_trials[idx][1]
+                train_data = x_train[idx]
             else:
-                train_data = np.concatenate((train_data, list_of_trials[idx][1]), axis=0)
+                train_data = np.concatenate((train_data, x_train[idx]), axis=0)
         best_model, model_id = hmm_model_training.train_hmm_model(train_data, lengths)
+        all_log_curves = []
+        for itrial in range(len(x_train)):
+            one_log_curve = util.fast_log_curve_calculation(x_train[itrial], best_model['model'])
+            all_log_curves.append(one_log_curve)
+        np_matrix_of_all_log_curves = np.matrix(all_log_curves)
 
-        FP = 0.0
-        for itest in range(len(x_test)):
-            one_log_curve = util.fast_log_curve_calculation(x_test[itest], best_model['model'])
-            if one_log_curve[-1] > threshold_for_log_likelihood[-1]: FP +=1 
-        idfyRate = FP / len(x_test)
-        acc_list.append(idfyRate)
-        print idfyRate
-    plt.subplot(212)
-    plt.title('accuracy vs num synthetic data')
-    plt.plot(num_data_list, acc_list, 'o-')
+        '''
+        plt.figure()
+        plt.subplot(111)
+        plt.title('All log likelihood curves and calculated threshold')
+        for no in range(np_matrix_of_all_log_curves.shape[0]):
+            plt.plot(np_matrix_of_all_log_curves[no].tolist()[0], linestyle='--', color='gray', label = 'testing_trial')
+        colors = iter(cm.rainbow(np.linspace(0,1,5)))
+        for c in np.arange(0, 10, 2):
+            plt.plot((np_matrix_of_all_log_curves.mean(0) - c * np_matrix_of_all_log_curves.std(0)).tolist()[0], label = 'mean-%s*std' %(c,), linestyle='solid', color = next(colors))
+        plt.legend(loc='best')
+        '''
+
+        threshold_c = 3
+        threshold_for_log_likelihood  = (np_matrix_of_all_log_curves.mean(0) - threshold_c * np_matrix_of_all_log_curves.std(0)).tolist()[0]
+
+        # train the model with data augmentation and test it
+        print "train the model with data augmentation and test it"
+        acc_list      = []
+        for num_data in num_syn_data_list:
+            old_files = glob.glob(os.path.join(output_dir, '*'))
+            for old_file in old_files: os.remove(old_file)
+            for i in range(len(x_train)):
+                print ('Generating synthetic data from real_{0}'.format(i))
+                df = pd.DataFrame(x_train[i], columns=training_config.interested_data_fields)
+                df.to_csv(os.path.join(output_dir, 'real_' + str(i) + '.csv'))
+
+                generate_synthetic_data.run_finite_differece_matrix(df=df,
+                                                                    num_data = num_data,
+                                                                    csv_save_path=output_dir,
+                                                                    trial_name='real_'+str(i))
+
+                # generate_synthetic_data.run_bootstrap(df=df,
+                #                                       num_data = num_data,
+                #                                       csv_save_path=output_dir,
+                #                                       trial_name='real_'+str(i))
+
+                # generate_synthetic_data.run_sampling_from_trained_hmm_model(df=df,
+                #                                                             model = best_model['model'],
+                #                                                             num_data = num_data,
+                #                                                             csv_save_path = output_dir,
+                #                                                             trial_name = 'sampling_from_trained_model')
+
+            # generate_synthetic_data.cross_signals_difference_with_weights(x_train = x_train,
+            #                                                               total_num_data =  num_data * len(train_data),
+            #                                                               csv_save_path=output_dir,
+            #                                                               trial_name='cross_diff')
+            
+            #train model with synthetic data
+            anomaly_data_group_by_folder_name = util.get_anomaly_data_for_labelled_case(training_config, output_dir)
+            list_of_trials = anomaly_data_group_by_folder_name.values()
+            lengths = []
+            for idx in range(len(list_of_trials)):
+                lengths.append(list_of_trials[idx][1].shape[0])
+                if idx == 0:
+                    train_data = list_of_trials[idx][1]
+                else:
+                    train_data = np.concatenate((train_data, list_of_trials[idx][1]), axis=0)
+            best_model, model_id = hmm_model_training.train_hmm_model(train_data, lengths)
+
+            FP = 0.0
+            for itest in range(len(x_test)):
+                one_log_curve = util.fast_log_curve_calculation(x_test[itest], best_model['model'])
+                if one_log_curve[-1] > threshold_for_log_likelihood[-1]: FP +=1 
+            idfyRate = FP / len(x_test)
+            acc_list.append(idfyRate)
+            print idfyRate
+        plt.plot(num_syn_data_list, acc_list, 'o-', label = 'n_real=' + str(n_real))
+
+    plt.title('Anomaly identification accuracy vs num synthetic data')
+    plt.xlabel('Identification accuracy')
+    plt.ylabel('Synthetic trials for each real trail')
+    plt.legend()
+    plt.savefig('./images/Anomaly_identification_accuracy_vs_num_synthetic_data.eps', format='eps', dpi=300)
     plt.show()
             
 if __name__=="__main__":

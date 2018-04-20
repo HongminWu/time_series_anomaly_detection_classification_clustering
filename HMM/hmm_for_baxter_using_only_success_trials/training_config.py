@@ -49,6 +49,17 @@ modalities_store = {
         '.endpoint_state.twist.angular.z',
     ],
 
+
+    'endpoint_state_wrench':[
+        '.endpoint_state.wrench.force.x',
+        '.endpoint_state.wrench.force.y',
+        '.endpoint_state.wrench.force.z',
+        '.endpoint_state.wrench.torque.x',
+        '.endpoint_state.wrench.torque.y',
+        '.endpoint_state.wrench.torque.z',
+    ],
+
+    
     'wrench': [
          '.wrench_stamped.wrench.force.x',
          '.wrench_stamped.wrench.force.y',
@@ -145,9 +156,13 @@ modalities_store = {
         '.endpoint_state.wrench.force.magnitude',
         '.endpoint_state.wrench.torque.magnitude',
         ],
-    
-        
 }
+
+modality_chosen = [ 'endpoint_state_twist', 'endpoint_state_wrench',  'wrench']
+interested_data_fields = []
+for modality in modality_chosen:
+    interested_data_fields += modalities_store[modality]
+interested_data_fields.append('.tag')
 
 model_type_options = [
     'BNPY\'s HMM',
@@ -155,14 +170,6 @@ model_type_options = [
     'hmmlearn\'s GMMHMM',
     'PYHSMM\'s HMM',
 ]
-
-modality_chosen = [ 'endpoint_state_twist', 'wrench']
-interested_data_fields = []
-for modality in modality_chosen:
-    interested_data_fields += modalities_store[modality]
-interested_data_fields.append('.tag')
-
-
 # config provided by the user
 config_by_user = {
 
@@ -174,7 +181,7 @@ config_by_user = {
     'nFeatures'               : len(interested_data_fields) - 1,
     'interested_data_fields'  :  interested_data_fields,
     'data_type_chosen'        :  ', '.join(modality_chosen),    
-    'model_type_chosen'       :  model_type_options[1],
+    'model_type_chosen'       :  model_type_options[0],
     'score_metric'            : '_score_metric_last_time_stdmeanratio_',
     'anomaly_detection_metric': anomaly_detection_metric_options[1],
 

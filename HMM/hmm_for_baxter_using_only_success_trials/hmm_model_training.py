@@ -97,7 +97,7 @@ def run(model_save_path,
         print
         print
         model = best_model['model']
-        if model_type == 'hmmlearn\'s HMM':
+        if model_type in ['hmmlearn\'s HMM', 'hmmlearn\'s GMMHMM']:
             _, model.z = model.decode(X, algorithm="viterbi")
 
         elif model_type == 'BNPY\'s HMM':
@@ -105,9 +105,6 @@ def run(model_save_path,
 
         elif model_type == 'PYHSMM\'s HMM':
             model.z = model.model.stateseqs[0]
-
-        elif model_type == 'hmmlearn\'s GMMHMM':
-            _, model.z = model.decode(X, algorithm="viterbi")
 
         else:
             print 'Sorry, this model cannot obtain the hidden state sequence'
