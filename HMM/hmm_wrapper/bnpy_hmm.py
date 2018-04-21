@@ -134,7 +134,7 @@ class HongminHMM():
             zHat =  self.runViterbiAlg(Lik[start:stop], np.log(initPi), np.log(transPi))
             zHatBySeq.append(zHat)
         zHatFlat = StateSeqUtil.convertStateSeq_list2flat(zHatBySeq, dataset)
-        return None, zHatFlat        
+        return Lik, zHatFlat        
 
     def score(self, X):
 

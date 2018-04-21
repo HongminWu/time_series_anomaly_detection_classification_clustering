@@ -34,12 +34,7 @@ def train_model(x_train, y_train, class_names):
                 data_tempt = np.concatenate((data_tempt, train_data[i]), axis=0)
         train_data = data_tempt
         best_model, model_id = hmm_model_training.train_hmm_model(train_data, lengths)
-        anomaly_model_path = os.path.join(training_config.anomaly_model_save_path, 
-                                                   model_name, 
-                                                   training_config.config_by_user['data_type_chosen'], 
-                                                   training_config.config_by_user['model_type_chosen'], 
-                                                   )
-        
+        anomaly_model_path = training_config.anomaly_model_save_path        
         if not os.path.isdir(anomaly_model_path):
             os.makedirs(anomaly_model_path)
         joblib.dump(
@@ -48,15 +43,27 @@ def train_model(x_train, y_train, class_names):
         )
         
         model = best_model['model']
-        _, zhidden = model.decode(train_data, lengths=lengths)
         zhat = []
-        trial_len = len(zhidden) / len(indices)
-        for iTrial in range(len(indices)):
-            zseq = zhidden[iTrial * trial_len : (iTrial + 1) * trial_len]
-#            model.show_single_sequence(iTrial, zseq) # only for bnpy model
-            zhat.append(zseq.tolist() + [zseq[-1]])
-        zdf = pd.DataFrame(zhat)
-        zdf.to_csv(anomaly_model_path + '/zhat.csv', index = False)        
+        if training_config.model_type_chosen == "BNPY's HMM":
+            lik_of_all_comp, zhidden = model.decode(train_data, lengths=lengths)
+            trial_len = len(zhidden) / len(indices)
+            for iTrial in range(len(indices)):
+                zseq = zhidden[iTrial * trial_len : (iTrial + 1) * trial_len]
+                #model.show_single_sequence(iTrial, zseq)
+                zhat.append(zseq.tolist() + [zseq[-1]])
+            zdf = pd.DataFrame(zhat)
+            zdf.to_csv(anomaly_model_path + '/zhat.csv', index = False)
+            lik_df = pd.DataFrame(lik_of_all_comp)
+            lik_df.to_csv(anomaly_model_path + '/lik_of_all_comp.csv', index = False)
+        else:
+            _, zhidden = model.decode(train_data, lengths=lengths)        
+            trial_len = len(zhidden) / len(indices)
+            for iTrial in range(len(indices)):
+                zseq = zhidden[iTrial * trial_len : (iTrial + 1) * trial_len]
+                zhat.append(zseq.tolist() + [zseq[-1]])
+            zdf = pd.DataFrame(zhat)
+            zdf.to_csv(anomaly_model_path + '/zhat.csv', index = False)
+        
 
 class HMMClassifier():
 

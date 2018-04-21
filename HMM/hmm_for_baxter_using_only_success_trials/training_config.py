@@ -158,7 +158,7 @@ modalities_store = {
         ],
 }
 
-modality_chosen = [ 'endpoint_state_twist', 'endpoint_state_wrench',  'wrench']
+modality_chosen = [ 'endpoint_state_twist','wrench']
 interested_data_fields = []
 for modality in modality_chosen:
     interested_data_fields += modalities_store[modality]
@@ -206,13 +206,13 @@ norm_style            = config_by_user['norm_style']
 
 success_path = os.path.join(config_by_user['dataset_path'], "success")
 test_success_data_path = os.path.join(config_by_user['dataset_path'], "success_for_test")
-model_save_path = os.path.join(config_by_user['base_path'], "model", config_by_user['data_type_chosen'], config_by_user['model_type_chosen'], model_id)
+model_save_path = os.path.join(config_by_user['base_path'], "model", config_by_user['data_type_chosen'], config_by_user['model_type_chosen'])
 figure_save_path = os.path.join(config_by_user['base_path'], "figure", config_by_user['data_type_chosen'], config_by_user['model_type_chosen'], model_id)
 
 # for anomaly analysis
 anomaly_data_path = config_by_user['dataset_path']
 anomaly_raw_data_path = os.path.join(config_by_user['dataset_path'], 'anomalies')
-anomaly_model_save_path = os.path.join(config_by_user['base_path'], "anomaly_models")
+anomaly_model_save_path = os.path.join(config_by_user['base_path'], "anomaly_models", config_by_user['data_type_chosen'], config_by_user['model_type_chosen'])
 anomaly_identification_figure_path = os.path.join(config_by_user['base_path'], "figure", config_by_user['data_type_chosen'], config_by_user['model_type_chosen'])
 
 exec '\n'.join("%s=%r"%i for i in config_by_user.items())
