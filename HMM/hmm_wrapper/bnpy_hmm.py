@@ -96,10 +96,8 @@ class HongminHMM():
             self.preSample = sample 
         length = 1
         doc_range = [0, length]
-        dataset = bnpy.data.GroupXData(X, doc_range, length, Xprev)
-
-        LP = self.model.calc_local_params(dataset)
-        framelogprob = LP['E_log_soft_ev'] #probability of per-component under the posterior
+        dataset = bnpy.data.GroupXData(X, doc_range, length, Xprev)        
+        framelogprob = self.model.obsModel.calcLogSoftEvMatrix_FromPost(dataset)
         if self.fwdlattice is None:
             self.fwdlattice = np.zeros((1, self.K))
             for i in range(self.K):
@@ -115,41 +113,30 @@ class HongminHMM():
         return curr_log
 
     def decode(self, X, lengths):
-
         Xprev      = X[:-1,:]
         X          = X[1:,:]
         doc_range  = list([0])
         doc_range += (np.cumsum(lengths).tolist())
-        dataset    = bnpy.data.GroupXData(X, doc_range, None, Xprev)     
-   
+        dataset    = bnpy.data.GroupXData(X, doc_range, None, Xprev)        
         from bnpy.util import StateSeqUtil
-        initPi =  self.model.allocModel.get_init_prob_vector()
-        transPi = self.model.allocModel.get_trans_prob_matrix()
-        LP = self.model.calc_local_params(dataset)
-        Lik = LP['E_log_soft_ev']
+        
         zHatBySeq = list()
+        probBySeq = list()
+        logBySeq  = list()
         for n in range(dataset.nDoc):
-            start = dataset.doc_range[n]
-            stop  = dataset.doc_range[n + 1]
-            zHat =  self.runViterbiAlg(Lik[start:stop], np.log(initPi), np.log(transPi))
+            log = self.model.obsModel.calcLogSoftEvMatrix_FromPost(dataset.make_subset([n]))
+            zHat =  self.runViterbiAlg(log, self.log_startprob, self.log_transmat)
             zHatBySeq.append(zHat)
-        zHatFlat = StateSeqUtil.convertStateSeq_list2flat(zHatBySeq, dataset)
-        return Lik, zHatFlat        
-
-    def score(self, X):
-
-        Xprev  = X[:-1,:]
-        X      = X[1:,:]
-        length = len(X)
-        doc_range = [0, length]
-        dataset = bnpy.data.GroupXData(X, doc_range, length, Xprev)
-
-        LP = self.model.calc_local_params(dataset)
-        log_probability = LP['evidence'] # by HongminWu 28.07-2017
-        return log_probability
+            log_curve = [logsumexp(log[i]) for i in range(len(log))]
+            logBySeq.append(log_curve)
+            
+            LP = self.model.calc_local_params(dataset.make_subset([n]))
+            prob_ = LP['resp'] #probability of per-component under the posterior
+            probBySeq.append(prob_)
+        # zHatFlat = StateSeqUtil.convertStateSeq_list2flat(zHatBySeq, dataset)
+        return zHatBySeq, probBySeq, logBySeq
                    
     def predict_proba(self, X):
-
         Xprev  = X[:-1,:]
         X      = X[1:,:]
         length = len(X)
@@ -160,6 +147,16 @@ class HongminHMM():
         log_probability = LP['resp'] #probability of per-component under the posterior
         return log_probability  
 
+    def score(self, X):
+        Xprev  = X[:-1,:]
+        X      = X[1:,:]
+        length = len(X)
+        doc_range = [0, length]
+        dataset = bnpy.data.GroupXData(X, doc_range, length, Xprev)
+        LP = self.model.calc_local_params(dataset)
+        log_probability = LP['evidence'] # by HongminWu 28.07-2017
+        return log_probability
+
     def calc_log(self, X):
 
         Xprev  = X[:-1,:]
@@ -167,8 +164,7 @@ class HongminHMM():
         length = len(X)
         doc_range = [0, length]
         dataset = bnpy.data.GroupXData(X, doc_range, length, Xprev)
-        LP = self.model.calc_local_params(dataset)
-        log = LP['E_log_soft_ev']
+        log = self.model.obsModel.calcLogSoftEvMatrix_FromPost(dataset)        
         log_curve = [logsumexp(log[i]) for i in range(len(log))]
         log_curve = np.cumsum(log_curve)
         return log_curve

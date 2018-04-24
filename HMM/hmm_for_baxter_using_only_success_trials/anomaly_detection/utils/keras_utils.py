@@ -23,7 +23,7 @@ from keras import backend as K
 
 from utils.generic_utils import load_dataset_at, calculate_dataset_metrics, cutoff_choice, \
                                 cutoff_sequence, plot_dataset
-from utils.constants import MAX_SEQUENCE_LENGTH_LIST
+from utils.constants import MAX_SEQUENCE_LENGTH_LIST, NB_CLASSES_LIST
 import ipdb
 
 def train_model(model, dataset_id, dataset_prefix, epochs=50, batch_size=128, val_subset=None,
@@ -115,8 +115,13 @@ def evaluate_model(model, dataset_id, dataset_prefix, batch_size=128, test_data_
         y_test = y_test[:test_data_subset]
 
     print("\nEvaluating : ")
-    ipdb.set_trace()
     loss, accuracy = model.evaluate(X_test, y_test, batch_size=batch_size)
+    from evaluate_metrics import plot_confusion_matrix
+    y_pred = model.predict(X_test, batch_size = batch_size)
+    y_pred = (np.argmax(y_pred, axis=1)).tolist()
+    y_test = (np.argmax(y_test, axis=1)).tolist()    
+    plot_confusion_matrix.run(y_test, y_pred, ['zero', 'two', 'three', 'four']) 
+    
     print()
     print("Final Accuracy : ", accuracy)
 

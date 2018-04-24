@@ -17,12 +17,13 @@ step-4: modeling the log_lik with the same zhat value with a 1D Gaussian model
 step-5: online: for each time step, we can get the lik_of_all_state and log_lik, and inference the correspounding zhat, and then calcualte the probability of p(log_lik | 1d-gaussian model). If the probability less than 50%, deem as anomaly.
 '''
 
-import os, ipdb
+import os, sys, ipdb
 import numpy as np
 import pandas as pd
 from sklearn.externals import joblib
 from sklearn.neural_network import MLPClassifier        
 from scipy.special import logsumexp
+import matplotlib.pyplot as plt
 import HMM.hmm_for_baxter_using_only_success_trials.training_config as training_config
 import HMM.hmm_for_baxter_using_only_success_trials.util as util
 import HMM.hmm_for_baxter_using_only_success_trials.hmm_model_training as hmm_model_training
@@ -48,10 +49,13 @@ def train_norminal_model():
 
     model = best_model['model']
     lik_of_all_states, zhat = model.decode(x_train, lengths=lengths)
-    lik_zhat_df = pd.DataFrame(lik_of_all_states, columns=['k_{0}'.format(col) for col in range(lik_of_all_states.shape[1])])
+#    model.show_single_sequence(0, zhat[0:lengths[0]])    
+    lik_zhat_df = pd.DataFrame()
+    lik_zhat_df['zhat'] =  zhat
+    for k in range(lik_of_all_states.shape[1]):
+        lik_zhat_df['k_{0}'.format(k)] = lik_of_all_states[:,k]
     log_curve = [logsumexp(lik_of_all_states[i]) for i in range(len(lik_of_all_states))]
     lik_zhat_df['log'] = log_curve
-    lik_zhat_df['zhat'] = zhat
     lik_zhat_df.to_csv(training_config.model_save_path + '/lik_zhat_df.csv', index = False)
     return model, lik_zhat_df
 
@@ -63,13 +67,34 @@ if __name__=="__main__":
         model = joblib.load(training_config.model_save_path + "/model_s%s.pkl"%(1,))
     K = model.K
     k_id_list = ['k_{0}'.format(i) for i in range(K)]
+    
+    # for MLPClassifier 
     all_liklihood_data = df[k_id_list].values
-    all_log_data       = df['log'].values
-    zhat = df['zhat']
+    zhat               = df['zhat'].values
+    colors = ['r', 'g', 'b', 'g', 'c', 'm', 'y', 'k']
+    markers = ['o', '+', '*', 's', 'x', '>', '<', '.']
+    plt.title('The log-likelihood values of specific hidden state')
+    for i, iz in enumerate(df['zhat'].unique().tolist()):
+        plt.subplot(len(df['zhat'].unique().tolist()), 1, i+1)
+        plt.plot(df['log'].loc[df['zhat'] == iz].values, marker = markers[i], color = colors[i], linestyle = 'None', label = iz)
+        iz_log = df['log'].loc[df['zhat'] == iz]
+        plt.legend()
+    plt.figure()
+    
+    plt.title('All log in variable color')
+    for i, iz in enumerate(df['zhat'].unique().tolist()):
+        df['log'].loc[df['zhat'] == iz].plot(marker = markers[i], color = colors[i], linestyle = 'None', label = iz)
+        plt.legend()
+    plt.show()
+    
+    # for LSTM_FCN
+    df[ ['zhat'] + k_id_list].to_csv('tag_3_x_train', header = False, index=False)
+    df[ ['zhat'] + k_id_list].to_csv('tag_3_x_test', header = False, index=False)    
+
+    '''
     MLPclf = MLPClassifier(solver='sgd', alpha=1e-5, tol=1e-9,  max_iter = 100000, random_state = 1)
     MLPclf.fit(all_liklihood_data, zhat)
     z_predict = MLPclf.predict(all_liklihood_data)
     from evaluate_metrics import plot_confusion_matrix
-    plot_confusion_matrix.run(zhat, z_predict, str(np.unique(zhat).tolist()))
-    import  matplotlib.pyplot as plt
-    plt.show()
+    plot_confusion_matrix.run(zhat, z_predict, str(df['zhat'].unique()))
+    '''

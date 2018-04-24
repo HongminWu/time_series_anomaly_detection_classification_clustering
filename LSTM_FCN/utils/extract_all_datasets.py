@@ -1,6 +1,7 @@
 import os
 import glob
 import shutil
+import ipdb
 
 path = '_data'
 
@@ -8,6 +9,7 @@ if not os.path.exists(path):
     os.makedirs(path)
 
 for fn in glob.glob("*/*"):
+    print fn
     file_name = os.path.split(fn)[-1]
     new_path = os.path.join(path, file_name)
 

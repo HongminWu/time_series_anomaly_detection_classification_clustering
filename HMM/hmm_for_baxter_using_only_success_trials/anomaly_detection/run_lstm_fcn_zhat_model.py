@@ -5,13 +5,13 @@ from keras.layers import Conv1D, BatchNormalization, GlobalAveragePooling1D, Per
 from utils.constants import MAX_SEQUENCE_LENGTH_LIST, NB_CLASSES_LIST
 from utils.keras_utils import train_model, evaluate_model, set_trainable, visualize_context_vector, visualize_cam
 from utils.layer_utils import AttentionLSTM
+from utils.constants import MAX_SEQUENCE_LENGTH_LIST, NB_CLASSES_LIST
 
-DATASET_INDEX = 12
+
+DATASET_INDEX = 0
 
 MAX_SEQUENCE_LENGTH = MAX_SEQUENCE_LENGTH_LIST[DATASET_INDEX]
 NB_CLASS = NB_CLASSES_LIST[DATASET_INDEX]
-
-TRAINABLE = True
 
 
 def generate_model():
@@ -84,10 +84,9 @@ def generate_model_2():
 
 if __name__ == "__main__":
     model = generate_model()
+    #train_model(model, DATASET_INDEX, dataset_prefix='baxter_kitting_experiment_', epochs=200, batch_size=64)
 
-    #train_model(model, DATASET_INDEX, dataset_prefix='ecg200', epochs=200, batch_size=64)
-
-    evaluate_model(model, DATASET_INDEX, dataset_prefix='ecg200', batch_size=64)
+    evaluate_model(model, DATASET_INDEX, dataset_prefix='baxter_kitting_experiment_', batch_size=64)
 
     #visualize_context_vector(model, DATASET_INDEX, dataset_prefix='ecg200', visualize_sequence=True, visualize_classwise=True, limit=1)
 

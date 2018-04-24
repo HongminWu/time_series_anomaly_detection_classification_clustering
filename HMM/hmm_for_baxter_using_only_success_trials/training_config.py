@@ -25,7 +25,7 @@ anomaly_detection_metric_options = [
 ]
 
 dataset_path_options = [
-    '/home/birl_wu/time_series_anomaly_detection_classification_clustering/dataset/baxter_pnp_anomalies/'
+    '/home/birl_wu/time_series_anomaly_detection_classification_clustering/dataset/DATASET_FOR_MLSTM_FCN/baxter_pnp_anomalies'
     ]
 
 
