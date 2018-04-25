@@ -28,7 +28,7 @@ import HMM.hmm_for_baxter_using_only_success_trials.training_config as training_
 import HMM.hmm_for_baxter_using_only_success_trials.util as util
 import HMM.hmm_for_baxter_using_only_success_trials.hmm_model_training as hmm_model_training
 
-DO_TRAINING = False
+DO_TRAINING = True
 colors  = ['r', 'g', 'b', 'g', 'c', 'm', 'y', 'k']
 markers = ['o', '+', '*', 's', 'x', '>', '<', '.']
 

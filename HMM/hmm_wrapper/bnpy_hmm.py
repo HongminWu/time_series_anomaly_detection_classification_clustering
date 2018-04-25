@@ -1,6 +1,7 @@
 import bnpy
 import numpy as np
 from scipy.special import logsumexp
+import bnpy
 import ipdb
   
 class HongminHMM():
@@ -85,8 +86,6 @@ class HongminHMM():
         return self
 
     def add_one_sample_and_get_loglik(self, sample):
-#        if np.array([sample]).shape[0] == 1:
-#            sample = np.append([sample],[sample], axis=0)
         if self.preSample is None:
             self.preSample = sample
             return 0
@@ -119,21 +118,21 @@ class HongminHMM():
         doc_range += (np.cumsum(lengths).tolist())
         dataset    = bnpy.data.GroupXData(X, doc_range, None, Xprev)        
         from bnpy.util import StateSeqUtil
-        
         zHatBySeq = list()
         probBySeq = list()
         logBySeq  = list()
         for n in range(dataset.nDoc):
-            log = self.model.obsModel.calcLogSoftEvMatrix_FromPost(dataset.make_subset([n]))
-            zHat =  self.runViterbiAlg(log, self.log_startprob, self.log_transmat)
+            logSoftEv = self.model.obsModel.calcLogSoftEvMatrix_FromPost(dataset.make_subset([n]))
+            zHat =  self.runViterbiAlg(logSoftEv, self.log_startprob, self.log_transmat)
             zHatBySeq.append(zHat)
-            log_curve = [logsumexp(log[i]) for i in range(len(log))]
-            logBySeq.append(log_curve)
-            
-            LP = self.model.calc_local_params(dataset.make_subset([n]))
-            prob_ = LP['resp'] #probability of per-component under the posterior
-            probBySeq.append(prob_)
+            fmsg, margPrObs = bnpy.allocmodel.hmm.HMMUtil.FwdAlg(np.exp(self.log_startprob), np.exp(self.log_transmat), np.exp(logSoftEv))
+            loglik = np.log(margPrObs)
+            logBySeq.append(loglik)
+            #FwdBwdAlg(PiInit, PiMat, logSoftEv)
+            resp, respPair, logMargPrSeq = bnpy.allocmodel.hmm.HMMUtil.FwdBwdAlg(np.exp(self.log_startprob), np.exp(self.log_transmat), logSoftEv)
+            probBySeq.append(resp)
         # zHatFlat = StateSeqUtil.convertStateSeq_list2flat(zHatBySeq, dataset)
+        ipdb.set_trace()
         return zHatBySeq, probBySeq, logBySeq
                    
     def predict_proba(self, X):
@@ -142,33 +141,40 @@ class HongminHMM():
         length = len(X)
         doc_range = [0, length]
         dataset = bnpy.data.GroupXData(X, doc_range, length, Xprev)
-        LP = self.model.calc_local_params(dataset)
-        # HongminWu 24.02-2018
-        log_probability = LP['resp'] #probability of per-component under the posterior
-        return log_probability  
+        logSoftEv = self.model.obsModel.calcLogSoftEvMatrix_FromPost(dataset)            
+        #FwdBwdAlg(PiInit, PiMat, logSoftEv)
+        resp, respPair, logMargPrSeq = bnpy.allocmodel.hmm.HMMUtil.FwdBwdAlg(np.exp(self.log_startprob), np.exp(self.log_transmat), logSoftEv)
+        return resp  
 
     def score(self, X):
+        '''
+        Compute the the log-likelihood p(x_T | x_1, x_2,....,x_{T-1})
+        '''
         Xprev  = X[:-1,:]
         X      = X[1:,:]
         length = len(X)
         doc_range = [0, length]
-        dataset = bnpy.data.GroupXData(X, doc_range, length, Xprev)
-        LP = self.model.calc_local_params(dataset)
-        log_probability = LP['evidence'] # by HongminWu 28.07-2017
-        return log_probability
-
+        dataset   = bnpy.data.GroupXData(X, doc_range, length, Xprev)
+        logSoftEv = self.model.obsModel.calcLogSoftEvMatrix_FromPost(dataset)
+        # FwdAlg(PiInit, PiMat, SoftEv)        
+        fmsg, margPrObs = bnpy.allocmodel.hmm.HMMUtil.FwdAlg(np.exp(self.log_startprob), np.exp(self.log_transmat), np.exp(logSoftEv))
+        loglik = np.log(margPrObs)
+        cumsum_log = np.cumsum(loglik)
+        logprob = cumsum_log[-1]
+        return logprob
+    
     def calc_log(self, X):
-
         Xprev  = X[:-1,:]
         X      = X[1:,:]
         length = len(X)
         doc_range = [0, length]
         dataset = bnpy.data.GroupXData(X, doc_range, length, Xprev)
-        log = self.model.obsModel.calcLogSoftEvMatrix_FromPost(dataset)        
-        log_curve = [logsumexp(log[i]) for i in range(len(log))]
-        log_curve = np.cumsum(log_curve)
-        return log_curve
-        
+        logSoftEv = self.model.obsModel.calcLogSoftEvMatrix_FromPost(dataset)
+        # FwdAlg(PiInit, PiMat, SoftEv)
+        fmsg, margPrObs = bnpy.allocmodel.hmm.HMMUtil.FwdAlg(np.exp(self.log_startprob), np.exp(self.log_transmat), np.exp(logSoftEv))
+        loglik = np.log(margPrObs)
+        cumsum_log = np.cumsum(loglik)        
+        return cumsum_log
 
     def runViterbiAlg(self, logSoftEv, logPi0, logPi):
         
