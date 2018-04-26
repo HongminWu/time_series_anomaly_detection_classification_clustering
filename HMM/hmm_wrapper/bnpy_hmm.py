@@ -126,13 +126,13 @@ class HongminHMM():
             zHat =  self.runViterbiAlg(logSoftEv, self.log_startprob, self.log_transmat)
             zHatBySeq.append(zHat)
             fmsg, margPrObs = bnpy.allocmodel.hmm.HMMUtil.FwdAlg(np.exp(self.log_startprob), np.exp(self.log_transmat), np.exp(logSoftEv))
-            loglik = np.log(margPrObs)
+            
+            loglik = np.log(margPrObs) # 1-D, T
             logBySeq.append(loglik)
             #FwdBwdAlg(PiInit, PiMat, logSoftEv)
             resp, respPair, logMargPrSeq = bnpy.allocmodel.hmm.HMMUtil.FwdBwdAlg(np.exp(self.log_startprob), np.exp(self.log_transmat), logSoftEv)
             probBySeq.append(resp)
         # zHatFlat = StateSeqUtil.convertStateSeq_list2flat(zHatBySeq, dataset)
-        ipdb.set_trace()
         return zHatBySeq, probBySeq, logBySeq
                    
     def predict_proba(self, X):
@@ -144,8 +144,17 @@ class HongminHMM():
         logSoftEv = self.model.obsModel.calcLogSoftEvMatrix_FromPost(dataset)            
         #FwdBwdAlg(PiInit, PiMat, logSoftEv)
         resp, respPair, logMargPrSeq = bnpy.allocmodel.hmm.HMMUtil.FwdBwdAlg(np.exp(self.log_startprob), np.exp(self.log_transmat), logSoftEv)
-        return resp  
+        return resp
 
+    def get_emission_log_prob_matrix(self, X):    
+        Xprev  = X[:-1,:]
+        X      = X[1:,:]
+        length = len(X)
+        doc_range = [0, length]
+        dataset = bnpy.data.GroupXData(X, doc_range, length, Xprev)
+        logSoftEv = self.model.obsModel.calcLogSoftEvMatrix_FromPost(dataset)            
+        return logSoftEv
+    
     def score(self, X):
         '''
         Compute the the log-likelihood p(x_T | x_1, x_2,....,x_{T-1})
@@ -159,8 +168,8 @@ class HongminHMM():
         # FwdAlg(PiInit, PiMat, SoftEv)        
         fmsg, margPrObs = bnpy.allocmodel.hmm.HMMUtil.FwdAlg(np.exp(self.log_startprob), np.exp(self.log_transmat), np.exp(logSoftEv))
         loglik = np.log(margPrObs)
-        cumsum_log = np.cumsum(loglik)
-        logprob = cumsum_log[-1]
+        log_curve = np.cumsum(loglik)
+        logprob = log_curve[-1]
         return logprob
     
     def calc_log(self, X):
@@ -169,12 +178,13 @@ class HongminHMM():
         length = len(X)
         doc_range = [0, length]
         dataset = bnpy.data.GroupXData(X, doc_range, length, Xprev)
+        
         logSoftEv = self.model.obsModel.calcLogSoftEvMatrix_FromPost(dataset)
         # FwdAlg(PiInit, PiMat, SoftEv)
         fmsg, margPrObs = bnpy.allocmodel.hmm.HMMUtil.FwdAlg(np.exp(self.log_startprob), np.exp(self.log_transmat), np.exp(logSoftEv))
         loglik = np.log(margPrObs)
-        cumsum_log = np.cumsum(loglik)        
-        return cumsum_log
+        log_curve = np.cumsum(loglik)        
+        return log_curve
 
     def runViterbiAlg(self, logSoftEv, logPi0, logPi):
         

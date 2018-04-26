@@ -27,8 +27,10 @@ import matplotlib.pyplot as plt
 import HMM.hmm_for_baxter_using_only_success_trials.training_config as training_config
 import HMM.hmm_for_baxter_using_only_success_trials.util as util
 import HMM.hmm_for_baxter_using_only_success_trials.hmm_model_training as hmm_model_training
+import bnpy
 
-DO_TRAINING = True
+DO_TRAINING = False
+
 colors  = ['r', 'g', 'b', 'g', 'c', 'm', 'y', 'k']
 markers = ['o', '+', '*', 's', 'x', '>', '<', '.']
 
@@ -146,7 +148,7 @@ def train_norminal_model():
         if i == 0:
             x_train = temp[i][1]
         else:
-            x_train = np.concatenate((x_train, temp[i][1]), axis = 0)
+            x_train = np.concatenate((x_train, temp[i][1]), axis = 0)            
     best_model, model_id = hmm_model_training.train_hmm_model(x_train, lengths)
     if not os.path.isdir(training_config.model_save_path):
         os.makedirs(training_config.model_save_path)    
@@ -160,7 +162,7 @@ def train_norminal_model():
     _zhat = np.concatenate(zHatBySeq)
     _prob = np.concatenate(probBySeq)
     _log  = np.concatenate(logBySeq)
-    _zhat_prob_log= pd.DataFrame()
+    _zhat_prob_log = pd.DataFrame()
     _zhat_prob_log['zhat'] =  _zhat
     #calc_threshold_from_logsumexp_of_specific_zhat(_zhat_prob_log['zhat'].unique(), zHatBySeq, logBySeq)
     _zhat_prob_log['log']  = _log
@@ -169,6 +171,45 @@ def train_norminal_model():
     _zhat_prob_log.to_csv(training_config.model_save_path + '/zhat_prob_log.csv', index = False)
     return model, _zhat_prob_log
 
+def test_anomaly_detection_through_hidden_state(model, threshold_dict):
+    normial_data_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'tag_7')
+    normial_data_group_by_tag = util.get_anomaly_data_for_labelled_case(training_config, normial_data_path)
+    temp = normial_data_group_by_tag.values()
+    lengths = []
+    for i in range(len(temp)):
+        lengths.append(temp[i][1].shape[0])
+        if i == 0:
+            x = temp[i][1]
+        else:
+            x = np.concatenate((x, temp[i][1]), axis = 0)
+    '''
+    #1: get the logSoftEv (predict_prob) given current sample 
+    #2: estimate the zhat
+    #3: 
+    '''
+    prev_sample = None
+    for isampe in range(len(x)):
+        if prev_sample is None:
+            prev_sample = x[isampe]
+            continue
+        else:
+            test_sample = np.vstack((prev_sample, x[isampe]))
+            prev_sample = x[isampe]
+#            prev_sample += np.random.normal(0,5,prev_sample.shape) 
+        logSoftEv = model.get_emission_log_prob_matrix(test_sample)
+        log_startprob = np.log(model.model.allocModel.get_init_prob_vector())
+        log_transmat  = np.log(model.model.allocModel.get_trans_prob_matrix())        
+        zHat =  model.runViterbiAlg(logSoftEv, log_startprob, log_transmat)
+        try:
+            fmsg, margPrObs = bnpy.allocmodel.hmm.HMMUtil.FwdAlg(np.exp(log_startprob), np.exp(log_transmat), np.exp(logSoftEv))
+        except FloatingPointError:
+            pass
+        cur_loglik = np.log(margPrObs)
+        if cur_loglik[0] > threshold_dict[zHat[0]]:
+            print 'normal'
+        else:
+            print 'anomaly'
+            
 if __name__=="__main__":
     if DO_TRAINING:
         model, df = train_norminal_model()
@@ -182,17 +223,21 @@ if __name__=="__main__":
     df[ ['zhat'] + k_id_list].to_csv('tag_3_x_test', header = False, index=False)    
 
     # plot
+    threshold_dict = {}
     for i, iz in enumerate(df['zhat'].unique().tolist()):
         plt.subplot(len(df['zhat'].unique().tolist()), 1, i+1)
         plt.plot(df['log'].loc[df['zhat'] == iz].values, marker = markers[i], color = colors[i], linestyle = 'None', label = iz)
         zlog = df['log'].loc[df['zhat'] == iz].values
         zlog_mean = np.mean(zlog)
         zlog_var  = np.var(zlog)
-        threshold = zlog_mean - 2.0 * zlog_var
+        threshold = zlog_mean - 1.0 * zlog_var
+        threshold_dict[iz] = threshold
         plt.axhline(threshold, linewidth=4, color = 'r')
         plt.title('Concatenate all the log-likelihood values of hidden state {0}'.format(iz))
         plt.legend()
-        
+    np.save('threshold.npy', threshold_dict)
+    test_anomaly_detection_through_hidden_state(model, threshold_dict)
+
     '''  
     plt.figure()
     plt.title('All logsumexp values in variable color')
