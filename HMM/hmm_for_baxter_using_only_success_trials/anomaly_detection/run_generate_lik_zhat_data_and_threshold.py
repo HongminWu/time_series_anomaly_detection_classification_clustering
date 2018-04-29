@@ -29,7 +29,7 @@ import HMM.hmm_for_baxter_using_only_success_trials.util as util
 import HMM.hmm_for_baxter_using_only_success_trials.hmm_model_training as hmm_model_training
 import bnpy
 
-DO_TRAINING = False
+DO_TRAINING = True
 
 colors  = ['r', 'g', 'b', 'g', 'c', 'm', 'y', 'k']
 markers = ['o', '+', '*', 's', 'x', '>', '<', '.']
@@ -148,7 +148,7 @@ def train_norminal_model():
         if i == 0:
             x_train = temp[i][1]
         else:
-            x_train = np.concatenate((x_train, temp[i][1]), axis = 0)            
+            x_train = np.concatenate((x_train, temp[i][1]), axis = 0)
     best_model, model_id = hmm_model_training.train_hmm_model(x_train, lengths)
     if not os.path.isdir(training_config.model_save_path):
         os.makedirs(training_config.model_save_path)    
@@ -158,7 +158,8 @@ def train_norminal_model():
 
     model = best_model['model']
     zHatBySeq, probBySeq, logBySeq = model.decode(x_train, lengths=lengths)
-#    for nSeq in range(len(zHatBySeq)): model.show_single_sequence(nSeq, zHatBySeq[nSeq])
+    for nSeq in range(len(zHatBySeq)):
+        model.show_single_sequence(nSeq, zhat_T = zHatBySeq[nSeq])
     _zhat = np.concatenate(zHatBySeq)
     _prob = np.concatenate(probBySeq)
     _log  = np.concatenate(logBySeq)
@@ -211,6 +212,7 @@ def test_anomaly_detection_through_hidden_state(model, threshold_dict):
             print 'anomaly'
             
 if __name__=="__main__":
+    
     if DO_TRAINING:
         model, df = train_norminal_model()
     else:

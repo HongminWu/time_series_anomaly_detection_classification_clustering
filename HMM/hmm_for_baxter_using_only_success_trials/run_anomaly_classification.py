@@ -34,76 +34,47 @@ def train_model(x_train, y_train, class_names):
                 data_tempt = np.concatenate((data_tempt, train_data[i]), axis=0)
         train_data = data_tempt
         best_model, model_id = hmm_model_training.train_hmm_model(train_data, lengths)
-        anomaly_model_path = training_config.anomaly_model_save_path        
+        anomaly_model_path = os.path.join(training_config.anomaly_model_save_path, model_name)
         if not os.path.isdir(anomaly_model_path):
             os.makedirs(anomaly_model_path)
         joblib.dump(
             best_model['model'],
             os.path.join(anomaly_model_path, "model_s%s.pkl"%(1,))
         )
-        
-        model = best_model['model']
-        zhat = []
-        if training_config.model_type_chosen == "BNPY's HMM":
-            lik_of_all_comp, zhidden = model.decode(train_data, lengths=lengths)
-            trial_len = len(zhidden) / len(indices)
-            for iTrial in range(len(indices)):
-                zseq = zhidden[iTrial * trial_len : (iTrial + 1) * trial_len]
-                #model.show_single_sequence(iTrial, zseq)
-                zhat.append(zseq.tolist() + [zseq[-1]])
-            zdf = pd.DataFrame(zhat)
-            zdf.to_csv(anomaly_model_path + '/zhat.csv', index = False)
-            lik_df = pd.DataFrame(lik_of_all_comp)
-            lik_df.to_csv(anomaly_model_path + '/lik_of_all_comp.csv', index = False)
-        else:
-            _, zhidden = model.decode(train_data, lengths=lengths)        
-            trial_len = len(zhidden) / len(indices)
-            for iTrial in range(len(indices)):
-                zseq = zhidden[iTrial * trial_len : (iTrial + 1) * trial_len]
-                zhat.append(zseq.tolist() + [zseq[-1]])
-            zdf = pd.DataFrame(zhat)
-            zdf.to_csv(anomaly_model_path + '/zhat.csv', index = False)
+
+        if CLASSIFIER_TYPE == 'MLPClassifierHiddenSeq':
+            model = best_model['model']
+            zhat = []
+            if training_config.model_type_chosen == "BNPY's HMM":
+                lik_of_all_comp, zhidden = model.decode(train_data, lengths=lengths)
+                trial_len = len(zhidden) / len(indices)
+                for iTrial in range(len(indices)):
+                    zseq = zhidden[iTrial * trial_len : (iTrial + 1) * trial_len]
+                    #model.show_single_sequence(iTrial, zseq)
+                    zhat.append(zseq.tolist() + [zseq[-1]])
+                zdf = pd.DataFrame(zhat)
+                zdf.to_csv(anomaly_model_path + '/zhat.csv', index = False)
+                lik_df = pd.DataFrame(lik_of_all_comp)
+                lik_df.to_csv(anomaly_model_path + '/lik_of_all_comp.csv', index = False)
+            else:
+                _, zhidden = model.decode(train_data, lengths=lengths)        
+                trial_len = len(zhidden) / len(indices)
+                for iTrial in range(len(indices)):
+                    zseq = zhidden[iTrial * trial_len : (iTrial + 1) * trial_len]
+                    zhat.append(zseq.tolist() + [zseq[-1]])
+                zdf = pd.DataFrame(zhat)
+                zdf.to_csv(anomaly_model_path + '/zhat.csv', index = False)
         
 
 class HMMClassifier():
-
     def __init__(self):
         self.__name__ = 'HMMClassifier'
-
-    def predict_proba(self, x_test, class_names):
-        # load trained anomaly models
-        anomaly_model_group_by_label = {}
-        for fo in class_names:
-            anomaly_model_path = os.path.join(training_config.anomaly_model_save_path,
-                                                   fo,
-                                                   training_config.config_by_user['data_type_chosen'],
-                                                   training_config.config_by_user['model_type_chosen'],
-                                                   )
-            try:
-                anomaly_model_group_by_label[fo] = joblib.load(anomaly_model_path + "/model_s%s.pkl"%(1,))
-            except IOError:
-                print 'anomaly model of  %s not found'%(fo,)
-                raw_input("sorry! cann't load the anomaly model")
-                continue
-        predict_score = []
-        for i in range(len(x_test)):
-            temp_loglik = []
-            for model_label in class_names:
-                one_log_curve_of_this_model = util.fast_log_curve_calculation(x_test[i], anomaly_model_group_by_label[model_label])
-                temp_loglik.append(one_log_curve_of_this_model[-1])
-            temp_score = temp_loglik / np.sum(temp_loglik)
-            predict_score.append(temp_score)
-        return np.array(predict_score)
     
     def predict(self, x_test, class_names):
         # load trained anomaly models
         anomaly_model_group_by_label = {}
         for fo in class_names:
-            anomaly_model_path = os.path.join(training_config.anomaly_model_save_path,
-                                                   fo,
-                                                   training_config.config_by_user['data_type_chosen'],
-                                                   training_config.config_by_user['model_type_chosen'],
-                                                   )
+            anomaly_model_path = os.path.join(training_config.anomaly_model_save_path, fo)
             try:
                 anomaly_model_group_by_label[fo] = joblib.load(anomaly_model_path + "/model_s%s.pkl"%(1,))
             except IOError:
@@ -119,8 +90,8 @@ class HMMClassifier():
             # color = iter(cm.rainbow(np.linspace(0, 1, len(anomaly_model_group_by_label))))
             calc_cofidence_resourse = []
             for idx, model_label in enumerate(class_names):
-                one_log_curve_of_this_model = util.fast_log_curve_calculation(x_test[i], 
-                                                                            anomaly_model_group_by_label[model_label])
+                print i
+                one_log_curve_of_this_model = util.fast_log_curve_calculation(x_test[i], anomaly_model_group_by_label[model_label])
                 calc_cofidence_resourse.append({
                     'model_idx'         : idx,
                     'model_label'       : model_label,
@@ -138,6 +109,27 @@ class HMMClassifier():
             y_pred.append(classified_idx)
         return y_pred
 
+    def predict_proba(self, x_test, class_names):
+        # load trained anomaly models
+        anomaly_model_group_by_label = {}
+        for fo in class_names:
+            anomaly_model_path = os.path.join(training_config.anomaly_model_save_path, fo)
+            try:
+                anomaly_model_group_by_label[fo] = joblib.load(anomaly_model_path + "/model_s%s.pkl"%(1,))
+            except IOError:
+                print 'anomaly model of  %s not found'%(fo,)
+                raw_input("sorry! cann't load the anomaly model")
+                continue
+        predict_score = []
+        for i in range(len(x_test)):
+            temp_loglik = []
+            for model_label in class_names:
+                one_log_curve_of_this_model = util.fast_log_curve_calculation(x_test[i], anomaly_model_group_by_label[model_label])
+                temp_loglik.append(one_log_curve_of_this_model[-1])
+            temp_score = temp_loglik / np.sum(temp_loglik)
+            predict_score.append(temp_score)
+        return np.array(predict_score)    
+    
 class MLPClassifierHiddenSeq():
     def __init__(self):
         self.__name__ = 'MLPClassifierHiddenSeq'
@@ -147,11 +139,7 @@ class MLPClassifierHiddenSeq():
         x_train = []
         y_train = []
         for idx, fo in enumerate(class_names):
-            anomaly_model_path = os.path.join(training_config.anomaly_model_save_path,
-                                                  fo,
-                                                  training_config.config_by_user['data_type_chosen'],
-                                                  training_config.config_by_user['model_type_chosen'],
-                                                 )
+            anomaly_model_path = os.path.join(training_config.anomaly_model_save_path, fo)
             try:
                 zdf  = pd.read_csv(anomaly_model_path + '/zhat.csv')
                 temp = zdf.values
@@ -201,7 +189,6 @@ def run():
     x_test_path  = os.path.join(TRAIN_TEST_DATASET_PATH,  "X_test.npy")
     y_test_path  = os.path.join(TRAIN_TEST_DATASET_PATH,  "y_test.npy")
     labels_path  = os.path.join(TRAIN_TEST_DATASET_PATH,  "labels_list.npy")
-
     try:
         x_train = np.load(x_train_path)
         y_train = np.load(y_train_path)
@@ -216,19 +203,19 @@ def run():
     y_train =  y_train.reshape(-1,).tolist()
     y_test  =  y_test.reshape(-1,).tolist()
     class_names = labels.tolist()
-    if DO_TRAINING: train_model(x_train, y_train, class_names)
-    from evaluate_metrics import (plot_confusion_matrix, plot_roc_for_multiple_classes, \
-                                      plot_precision_recall)
+    if DO_TRAINING:
+        train_model(x_train, y_train, class_names)
+    from evaluate_metrics import (plot_confusion_matrix, plot_roc_for_multiple_classes, plot_precision_recall)
     if CLASSIFIER_TYPE == 'HMMClassifier':
         # for confusion matrix
         classifier = HMMClassifier()
         y_pred = classifier.predict(x_test, class_names)
         plot_confusion_matrix.run(y_test, y_pred, class_names)
         # for plot roc
-        y_score = classifier.predict_proba(x_test, class_names)
-        plot_roc_for_multiple_classes.run(y_score, y_test, class_names)
+        # y_score = classifier.predict_proba(x_test, class_names)
+        # plot_roc_for_multiple_classes.run(y_score, y_test, class_names)
         # for plot precision-recall curve
-        plot_precision_recall.run(y_score, y_test, class_names)
+        #plot_precision_recall.run(y_score, y_test, class_names)
         
     elif CLASSIFIER_TYPE == 'MLPClassifierHiddenSeq':
         # for confusion matrix

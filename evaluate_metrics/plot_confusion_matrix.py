@@ -45,11 +45,11 @@ def plot_confusion_matrix(cm, classes,
 
 def run(y_test, y_pred, class_names):
     #evaluate the results
-    print classification_report(y_test, y_pred,
-                                target_names=[l for l in class_names])
+    print 'classification_report:\n'
+    print classification_report(y_test, y_pred, target_names=[l for l in class_names])
     
-    conf_mat = confusion_matrix(y_test, y_pred)
     # Plot non-normalized confusion matrix
+    conf_mat = confusion_matrix(y_test, y_pred)
     plt.figure()
     plot_confusion_matrix(conf_mat, classes=class_names,
                           title='Confusion matrix, without normalization')

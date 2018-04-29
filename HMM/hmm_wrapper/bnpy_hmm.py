@@ -14,7 +14,7 @@ class HongminHMM():
         n_iteration,
         K,
         nTask       = 1,
-        nBatch      = 10,
+        nBatch      = 1,
         convergethr = 0.000000001, #for memoVB
         alpha       = 0.5, 
         gamma       = 5.0,  # top-level Dirichlet concentration parameter
@@ -123,12 +123,11 @@ class HongminHMM():
         logBySeq  = list()
         for n in range(dataset.nDoc):
             logSoftEv = self.model.obsModel.calcLogSoftEvMatrix_FromPost(dataset.make_subset([n]))
+            SoftEv, lognormC = bnpy.allocmodel.hmm.HMMUtil.expLogLik(logSoftEv)            
             zHat =  self.runViterbiAlg(logSoftEv, self.log_startprob, self.log_transmat)
             zHatBySeq.append(zHat)
-            fmsg, margPrObs = bnpy.allocmodel.hmm.HMMUtil.FwdAlg(np.exp(self.log_startprob), np.exp(self.log_transmat), np.exp(logSoftEv))
-            
-            loglik = np.log(margPrObs) # 1-D, T
-            logBySeq.append(loglik)
+            fmsg, margPrObs = bnpy.allocmodel.hmm.HMMUtil.FwdAlg(np.exp(self.log_startprob), np.exp(self.log_transmat), SoftEv)
+            logBySeq.append(margPrObs)
             #FwdBwdAlg(PiInit, PiMat, logSoftEv)
             resp, respPair, logMargPrSeq = bnpy.allocmodel.hmm.HMMUtil.FwdBwdAlg(np.exp(self.log_startprob), np.exp(self.log_transmat), logSoftEv)
             probBySeq.append(resp)
@@ -165,26 +164,34 @@ class HongminHMM():
         doc_range = [0, length]
         dataset   = bnpy.data.GroupXData(X, doc_range, length, Xprev)
         logSoftEv = self.model.obsModel.calcLogSoftEvMatrix_FromPost(dataset)
-        # FwdAlg(PiInit, PiMat, SoftEv)        
-        fmsg, margPrObs = bnpy.allocmodel.hmm.HMMUtil.FwdAlg(np.exp(self.log_startprob), np.exp(self.log_transmat), np.exp(logSoftEv))
-        loglik = np.log(margPrObs)
-        log_curve = np.cumsum(loglik)
-        logprob = log_curve[-1]
-        return logprob
+        # FwdAlg(PiInit, PiMat, SoftEv)
+        # SoftEv, lognormC = bnpy.allocmodel.hmm.HMMUtil.expLogLik(logSoftEv)        
+        # fmsg, margPrObs = bnpy.allocmodel.hmm.HMMUtil.FwdAlg(np.exp(self.log_startprob), np.exp(self.log_transmat), SoftEv)
+        # log_curve = np.cumsum(margPrObs)
+        # logprob = log_curve[-1]
+        #FwdBwdAlg(PiInit, PiMat, logSoftEv)
+        resp, respPair, logMargPrSeq = bnpy.allocmodel.hmm.HMMUtil.FwdBwdAlg(np.exp(self.log_startprob), np.exp(self.log_transmat), logSoftEv)
+        return logMargPrSeq
     
     def calc_log(self, X):
+        #np.seterr(divide='ignore', invalid='ignore')        
         Xprev  = X[:-1,:]
         X      = X[1:,:]
         length = len(X)
         doc_range = [0, length]
         dataset = bnpy.data.GroupXData(X, doc_range, length, Xprev)
-        
+        '''
         logSoftEv = self.model.obsModel.calcLogSoftEvMatrix_FromPost(dataset)
         # FwdAlg(PiInit, PiMat, SoftEv)
-        fmsg, margPrObs = bnpy.allocmodel.hmm.HMMUtil.FwdAlg(np.exp(self.log_startprob), np.exp(self.log_transmat), np.exp(logSoftEv))
-        loglik = np.log(margPrObs)
-        log_curve = np.cumsum(loglik)        
-        return log_curve
+        SoftEv, lognormC = bnpy.allocmodel.hmm.HMMUtil.expLogLik(logSoftEv)
+        fmsg, margPrObs = bnpy.allocmodel.hmm.HMMUtil.FwdAlg(np.exp(self.log_startprob), np.exp(self.log_transmat), SoftEv)
+        log_curve = [logsumexp(margPrObs[i]) for i in range(len(margPrObs))]
+        '''
+        LP = self.model.calc_local_params(dataset)
+        log = LP['E_log_soft_ev']
+        log_curve = [logsumexp(log[i]) for i in range(len(log))]
+        log_curve = np.cumsum(log_curve)
+        return log_curve    
 
     def runViterbiAlg(self, logSoftEv, logPi0, logPi):
         
@@ -246,7 +253,7 @@ class HongminHMM():
             seq_id,
             zhat_T     = None,
             z_img_cmap = None,
-            ylim       = [-12, 12],
+            ylim       = [-6, 6],
             K          = 5,
             left       = 0.2,
             bottom     = 0.2,
@@ -260,7 +267,7 @@ class HongminHMM():
         '''
 
         import matplotlib
-        from matplotlib import pylab
+        import matplotlib.pylab as plt
         dataset = self.dataset
         
         K = self.K
@@ -270,8 +277,11 @@ class HongminHMM():
             nrows = 1
         else:
             nrows = 2
-        fig_h, ax_handles = pylab.subplots(
-            nrows=nrows, ncols=1, sharex=True, sharey=False)
+        fig_h, ax_handles = plt.subplots(
+            nrows=nrows,
+            ncols=1,
+            sharex=True,
+            sharey=False)
         ax_handles = np.atleast_1d(ax_handles).flatten().tolist()
         start = dataset.doc_range[seq_id]
         stop = dataset.doc_range[seq_id + 1]
@@ -280,23 +290,27 @@ class HongminHMM():
         curX_TD = dataset.X[start:stop]
         for dim in xrange(dataset.dim):
             ax_handles[0].plot(curX_TD[:, dim], '.-')
-        ax_handles[0].set_ylabel('angle')
+        ax_handles[0].set_ylabel('Features')
         ax_handles[0].set_ylim(ylim)
         z_img_height = int(np.ceil(ylim[1] - ylim[0]))
-        pylab.subplots_adjust(
+        plt.subplots_adjust(
             wspace=0.1,
             hspace=0.1,
-            left=left, right=right,
-            bottom=bottom, top=top)
+            left=left,
+            right=right,
+            bottom=bottom,
+            top=top)
         if zhat_T is not None:
             img_TD = np.tile(zhat_T, (z_img_height, 1))
             ax_handles[1].imshow(
                 img_TD,
                 interpolation='nearest',
-                vmin=-0.5, vmax=(K-1)+0.5,
+                vmin=-0.5,
+                vmax=(K-1)+0.5,
                 cmap=z_img_cmap)
             ax_handles[1].set_ylim(0, z_img_height)
             ax_handles[1].set_yticks([])
+            # z legend
             bbox = ax_handles[1].get_position()
             width = (1.0 - bbox.x1) / 3
             height = bbox.y1 - bbox.y0
@@ -307,7 +321,7 @@ class HongminHMM():
             cbax_h.set_ticklabels(np.arange(K))
             cbax_h.ax.tick_params(labelsize=9)
         ax_handles[-1].set_xlabel('time')
-        pylab.show()
+        plt.show()
         return ax_handles
 
     

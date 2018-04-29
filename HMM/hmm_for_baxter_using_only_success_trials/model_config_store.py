@@ -76,7 +76,7 @@ model_store = {
         'config_set': {
             'ar': {
                 'hmm_max_train_iteration': 1000,
-                'hmm_hidden_state_amount': 5,
+                'hmm_hidden_state_amount': 10,
                 'alloModel' : 'HDPHMM',     
                 'obsModel'  : 'AutoRegGauss',
                 'ECovMat'   : ['covdata'],
@@ -86,7 +86,7 @@ model_store = {
             
             'diag': {
                 'hmm_max_train_iteration': 1000,
-                'hmm_hidden_state_amount': 5,
+                'hmm_hidden_state_amount': 10,
                 'alloModel' : 'HDPHMM',     
                 'obsModel'  : ['DiagGauss'],  
                 'ECovMat'   : ['covdata'],
@@ -96,7 +96,7 @@ model_store = {
 
             'gauss': {
                 'hmm_max_train_iteration': 10000,
-                'hmm_max_hidden_state_amount': 5,
+                'hmm_hidden_state_amount': 10,
                 'alloModel' : 'HDPHMM',     
                 'obsModel'  : ['Gauss'],
                 'ECovMat'   : ['covdata'],
