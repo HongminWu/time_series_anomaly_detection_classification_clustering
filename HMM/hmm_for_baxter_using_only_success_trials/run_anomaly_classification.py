@@ -214,8 +214,8 @@ def run():
         # for plot roc
         # y_score = classifier.predict_proba(x_test, class_names)
         # plot_roc_for_multiple_classes.run(y_score, y_test, class_names)
-        # for plot precision-recall curve
-        #plot_precision_recall.run(y_score, y_test, class_names)
+        # # for plot precision-recall curve
+        #plot_precision_recall.run(y_score, y_test,  class_names)   
         
     elif CLASSIFIER_TYPE == 'MLPClassifierHiddenSeq':
         # for confusion matrix

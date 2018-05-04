@@ -96,6 +96,7 @@ from sklearn.preprocessing import label_binarize
 from sklearn.metrics import precision_recall_curve
 from sklearn.metrics import average_precision_score
 import matplotlib.pyplot as plt
+import ipdb
 ###############################################################################
 # In multi-label settings
 # ------------------------

@@ -1,9 +1,9 @@
 import numpy as np
 import itertools
-from sklearn.metrics import classification_report, confusion_matrix
+from sklearn.metrics import classification_report, confusion_matrix, precision_recall_fscore_support
 import matplotlib.pyplot as plt
 import sys
-
+import ipdb
 def plot_confusion_matrix(cm, classes,
                           normalize=False,
                           title='Confusion matrix',
@@ -47,7 +47,12 @@ def run(y_test, y_pred, class_names):
     #evaluate the results
     print 'classification_report:\n'
     print classification_report(y_test, y_pred, target_names=[l for l in class_names])
-    
+    print 'average-weighted:\n'
+    print precision_recall_fscore_support(y_test, y_pred, average='weighted')
+    print 'average-micro:\n'    
+    print precision_recall_fscore_support(y_test, y_pred, average='micro')
+    print 'average-macro:\n'    
+    print precision_recall_fscore_support(y_test, y_pred, average='macro')    
     # Plot non-normalized confusion matrix
     conf_mat = confusion_matrix(y_test, y_pred)
     plt.figure()

@@ -158,7 +158,7 @@ modalities_store = {
         ],
 }
 
-modality_chosen = [ 'endpoint_state_twist','endpoint_state_wrench', 'wrench']
+modality_chosen = [ 'endpoint_state_twist', 'wrench']
 interested_data_fields = []
 for modality in modality_chosen:
     interested_data_fields += modalities_store[modality]

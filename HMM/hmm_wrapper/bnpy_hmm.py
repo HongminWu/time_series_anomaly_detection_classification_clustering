@@ -85,31 +85,6 @@ class HongminHMM():
         self.model         = model
         return self
 
-    def add_one_sample_and_get_loglik(self, sample):
-        if self.preSample is None:
-            self.preSample = sample
-            return 0
-        else:
-            Xprev  = np.array([self.preSample])
-            X      = np.array([sample])
-            self.preSample = sample 
-        length = 1
-        doc_range = [0, length]
-        dataset = bnpy.data.GroupXData(X, doc_range, length, Xprev)        
-        framelogprob = self.model.obsModel.calcLogSoftEvMatrix_FromPost(dataset)
-        if self.fwdlattice is None:
-            self.fwdlattice = np.zeros((1, self.K))
-            for i in range(self.K):
-                self.fwdlattice[0,i] = self.log_startprob[i] + framelogprob[0,i]
-            print "I am here once"
-        else:
-            self.fwdlattice = np.append(self.fwdlattice, np.zeros((1, self.K)), axis=0)
-            for j in range(self.K):
-                for i in range(self.K):
-                    self.work_buffer[i] = self.fwdlattice[-2,i] + self.log_transmat[i,j]
-                self.fwdlattice[-1,j] = logsumexp(self.work_buffer) + framelogprob[0,j]
-        curr_log = logsumexp(self.fwdlattice[-1])
-        return curr_log
 
     def decode(self, X, lengths):
         Xprev      = X[:-1,:]
@@ -156,42 +131,87 @@ class HongminHMM():
     
     def score(self, X):
         '''
-        Compute the the log-likelihood p(x_T | x_1, x_2,....,x_{T-1})
+        Compute the the joint log-likelihood p(x_1, x_2,....,x_T)
         '''
         Xprev  = X[:-1,:]
         X      = X[1:,:]
         length = len(X)
         doc_range = [0, length]
         dataset   = bnpy.data.GroupXData(X, doc_range, length, Xprev)
-        logSoftEv = self.model.obsModel.calcLogSoftEvMatrix_FromPost(dataset)
-        # FwdAlg(PiInit, PiMat, SoftEv)
-        # SoftEv, lognormC = bnpy.allocmodel.hmm.HMMUtil.expLogLik(logSoftEv)        
-        # fmsg, margPrObs = bnpy.allocmodel.hmm.HMMUtil.FwdAlg(np.exp(self.log_startprob), np.exp(self.log_transmat), SoftEv)
-        # log_curve = np.cumsum(margPrObs)
-        # logprob = log_curve[-1]
+        logSoftEv = self.model.obsModel.calcLogSoftEvMatrix_FromPost(dataset)    
         #FwdBwdAlg(PiInit, PiMat, logSoftEv)
         resp, respPair, logMargPrSeq = bnpy.allocmodel.hmm.HMMUtil.FwdBwdAlg(np.exp(self.log_startprob), np.exp(self.log_transmat), logSoftEv)
-        return logMargPrSeq
+        return logMargPrSeq # joint log probability of the oberved sequence
     
     def calc_log(self, X):
-        #np.seterr(divide='ignore', invalid='ignore')        
         Xprev  = X[:-1,:]
         X      = X[1:,:]
         length = len(X)
         doc_range = [0, length]
         dataset = bnpy.data.GroupXData(X, doc_range, length, Xprev)
-        '''
+        
         logSoftEv = self.model.obsModel.calcLogSoftEvMatrix_FromPost(dataset)
-        # FwdAlg(PiInit, PiMat, SoftEv)
         SoftEv, lognormC = bnpy.allocmodel.hmm.HMMUtil.expLogLik(logSoftEv)
         fmsg, margPrObs = bnpy.allocmodel.hmm.HMMUtil.FwdAlg(np.exp(self.log_startprob), np.exp(self.log_transmat), SoftEv)
-        log_curve = [logsumexp(margPrObs[i]) for i in range(len(margPrObs))]
-        '''
-        LP = self.model.calc_local_params(dataset)
-        log = LP['E_log_soft_ev']
-        log_curve = [logsumexp(log[i]) for i in range(len(log))]
+        log_curve = np.log(margPrObs) + lognormC
         log_curve = np.cumsum(log_curve)
-        return log_curve    
+        
+        '''
+        print 'offline\n'
+        print log_curve[:5]
+        print SoftEv[:5,:]
+        print lognormC[:5]
+        for i in range(len(X)):            
+            self.add_one_sample_and_get_loglik(X[i])            
+        '''
+        return log_curve
+
+    def add_one_sample_and_get_loglik(self, sample):
+        if self.preSample is None:
+            self.preSample = sample
+            Xprev  = np.array([sample])
+            X      = np.array([sample])
+        else:
+            Xprev  = np.array([self.preSample])
+            X      = np.array([sample])
+            self.preSample = sample 
+        length = 1
+        doc_range = [0, length]
+        dataset = bnpy.data.GroupXData(X, doc_range, length, Xprev)
+        
+        logSoftEv = self.model.obsModel.calcLogSoftEvMatrix_FromPost(dataset)
+        SoftEv, lognormC = bnpy.allocmodel.hmm.HMMUtil.expLogLik(logSoftEv)
+        PiMat = np.exp(self.log_transmat)
+        if self.fwdlattice is None:
+            self.fwdlattice = np.exp(self.log_startprob) * SoftEv 
+        else:
+            self.fwdlattice = np.dot(PiMat.T, self.fwdlattice[0]) * SoftEv
+        margPrObs = np.sum(self.fwdlattice)
+        self.fwdlattice /= margPrObs
+        curr_log = np.log(margPrObs) + lognormC
+        
+        print 'online\n'
+        print curr_log
+        print SoftEv
+        print lognormC
+        ipdb.set_trace()
+        
+        '''
+        framelogprob = logSoftEv
+        if self.fwdlattice is None:
+            self.fwdlattice = np.zeros((1, self.K))
+            for i in range(self.K):
+                self.fwdlattice[0,i] = self.log_startprob[i] + framelogprob[0,i]
+            print "I am here once"
+        else:
+            self.fwdlattice = np.append(self.fwdlattice, np.zeros((1, self.K)), axis=0)
+            for j in range(self.K):
+                for i in range(self.K):
+                    self.work_buffer[i] = self.fwdlattice[-2,i] + self.log_transmat[i,j]
+                self.fwdlattice[-1,j] = logsumexp(self.work_buffer) + framelogprob[0,j]
+        curr_log = logsumexp(self.fwdlattice[-1])
+        '''
+        return curr_log    
 
     def runViterbiAlg(self, logSoftEv, logPi0, logPi):
         
