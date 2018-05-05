@@ -154,21 +154,25 @@ class HongminHMM():
         SoftEv, lognormC = bnpy.allocmodel.hmm.HMMUtil.expLogLik(logSoftEv)
         fmsg, margPrObs = bnpy.allocmodel.hmm.HMMUtil.FwdAlg(np.exp(self.log_startprob), np.exp(self.log_transmat), SoftEv)
         log_curve = np.log(margPrObs) + lognormC
-        log_curve = np.cumsum(log_curve)
         
-        '''
-        print 'offline\n'
-        print log_curve[:5]
-        print SoftEv[:5,:]
-        print lognormC[:5]
-        for i in range(len(X)):            
-            self.add_one_sample_and_get_loglik(X[i])            
-        '''
+        # --- for testing the online incrementally calculate the current log-likelihood
+        # print 'offline\n'
+        # print log_curve[:5]
+        # print SoftEv[:5,:]
+        # print lognormC[:5]
+        # for i in range(len(X)):            
+        #     self.add_one_sample_and_get_loglik(X[i])            
+        # ---
+            
+        log_curve = np.cumsum(log_curve)
         return log_curve
 
     def add_one_sample_and_get_loglik(self, sample):
+        
         if self.preSample is None:
             self.preSample = sample
+            if self.model.obsModel.get_name() == 'AutoRegGauss':
+                return 0
             Xprev  = np.array([sample])
             X      = np.array([sample])
         else:

@@ -1,0 +1,2 @@
+2018-05-05 14:59:25,829 INFO -------------------------generate_classification_performance_logging_report_with_varible_model_parameters---------------------------------------------
+2018-05-05 14:59:25,841 INFO {'alloModel': 'HDPHMM', 'hmm_hidden_state_amount': 5, 'varMethod': 'memoVB', 'hmm_max_train_iteration': 1000, 'ECovMat': 'eye', 'obsModel': 'AutoRegGauss'}

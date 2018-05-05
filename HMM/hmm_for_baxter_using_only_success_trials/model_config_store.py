@@ -72,15 +72,26 @@ model_store = {
   
 
     'BNPY\'s HMM': {
-        'use': 'diag',
+        'use': 'mix',
         'config_set': {
+            
+            'mix': {
+                'hmm_max_train_iteration': 1000,
+                'hmm_hidden_state_amount': 5,
+                'alloModel' : 'HDPHMM',     
+                'obsModel'  : ['AutoRegGauss',  'DiagGauss', 'Gauss', 'ZeroMeanGauss'],
+                'ECovMat'   : ['eye', 'covdata', 'diagcovdata', 'diagcovfirstdiff'],
+               # 'ECovMat'  : ['covdata', 'diagcovdata','covfirstdiff', 'diagcovfirstdiff'],
+               # covfirstdiff only applies to auto-regressive datasets
+                'varMethod' : 'memoVB',
+            },
+            
             'ar': {
                 'hmm_max_train_iteration': 1000,
-                'hmm_hidden_state_amount': 10,
+                'hmm_hidden_state_amount': 5,
                 'alloModel' : 'HDPHMM',     
                 'obsModel'  : 'AutoRegGauss',
                 'ECovMat'   : ['covdata'],
-               # 'ECovMat'   : ['covdata', 'diagcovdata','covfirstdiff', 'diagcovfirstdiff'],
                 'varMethod' : 'memoVB',
             },
             
@@ -92,7 +103,6 @@ model_store = {
                 'ECovMat'   : ['covdata'],
                 'varMethod' : 'memoVB',
             },
-
 
             'gauss': {
                 'hmm_max_train_iteration': 10000,

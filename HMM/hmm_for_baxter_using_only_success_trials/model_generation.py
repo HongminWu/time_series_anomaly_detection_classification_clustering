@@ -193,9 +193,10 @@ def get_model_generator(model_type, model_config):
                             init_new_score_level()
                             for n_components in model_config['hmm_hidden_state_amount']:
                                 update_last_score_level()
-                                if does_bad_score_count_hit(2) and n_components>5:
-                                    clear_last_score_level()
-                                    break
+
+                                # if does_bad_score_count_hit(2) and n_components > 5:
+                                #     clear_last_score_level()
+                                #     break
 
                                 model = bnpy_hmm.HongminHMM(
                                     alloModel   = alloModel,

@@ -12,12 +12,13 @@ from sklearn.externals import joblib
 from sklearn.model_selection import LeavePOut
 from sklearn.model_selection import train_test_split
 import matplotlib.pyplot as plt
+from evaluate_metrics import (plot_confusion_matrix, plot_roc_for_multiple_classes, plot_precision_recall)
 import ipdb
 
-DO_TRAINING = True
+DO_TRAINING = False
 CLASSIFIER_TYPE_OPTIONS = ['HMMClassifier', 'MLPClassifierHiddenSeq']
 CLASSIFIER_TYPE = CLASSIFIER_TYPE_OPTIONS[0]
-
+        
 def train_model(x_train, y_train, class_names):
     '''
     function: train all the anomalious models
@@ -81,6 +82,7 @@ class HMMClassifier():
                 print 'anomaly model of  %s not found'%(fo,)
                 raw_input("sorry! cann't load the anomaly model")
                 continue
+            
         y_pred = []
         for i in range(len(x_test)):
             # plot
@@ -90,7 +92,6 @@ class HMMClassifier():
             # color = iter(cm.rainbow(np.linspace(0, 1, len(anomaly_model_group_by_label))))
             calc_cofidence_resourse = []
             for idx, model_label in enumerate(class_names):
-                print i
                 one_log_curve_of_this_model = util.fast_log_curve_calculation(x_test[i], anomaly_model_group_by_label[model_label])
                 calc_cofidence_resourse.append({
                     'model_idx'         : idx,
@@ -203,9 +204,10 @@ def run():
     y_train =  y_train.reshape(-1,).tolist()
     y_test  =  y_test.reshape(-1,).tolist()
     class_names = labels.tolist()
+
     if DO_TRAINING:
         train_model(x_train, y_train, class_names)
-    from evaluate_metrics import (plot_confusion_matrix, plot_roc_for_multiple_classes, plot_precision_recall)
+
     if CLASSIFIER_TYPE == 'HMMClassifier':
         # for confusion matrix
         classifier = HMMClassifier()
