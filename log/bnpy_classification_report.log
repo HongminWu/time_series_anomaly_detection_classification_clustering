@@ -1,2 +1,322 @@
-2018-05-05 14:59:25,829 INFO -------------------------generate_classification_performance_logging_report_with_varible_model_parameters---------------------------------------------
-2018-05-05 14:59:25,841 INFO {'alloModel': 'HDPHMM', 'hmm_hidden_state_amount': 5, 'varMethod': 'memoVB', 'hmm_max_train_iteration': 1000, 'ECovMat': 'eye', 'obsModel': 'AutoRegGauss'}
+2018-05-05 15:20:25,607 INFO -------------------------generate_classification_performance_logging_report_with_varible_model_parameters---------------------------------------------
+2018-05-05 15:20:25,619 INFO {'alloModel': 'HDPHMM', 'obsModel': 'AutoRegGauss', 'nTask': 1, 'hmm_hidden_state_amount': 5, 'startAlpha': 10.0, 'initname': 'randexamples', 'hmm_max_train_iteration': 1000, 'nBatch': 1, 'transAlpha': 5.0, 'ECovMat': 'eye', 'alpha': 0.5, 'hmmKappa': 50.0, 'convergethr': 1e-09, 'sF': 1.0, 'gamma': 5.0, 'varMethod': 'memoVB'}
+2018-05-05 15:20:50,051 INFO                  precision    recall  f1-score   support
+
+OBJECT_SLIPPING       1.00      0.12      0.21        17
+ TOOL_COLLISION       0.55      1.00      0.71        32
+HUMAN_COLLISION       0.83      0.91      0.87        22
+      NO_OBJECT       1.00      0.07      0.13        14
+
+    avg / total       0.79      0.65      0.56        85
+
+2018-05-05 15:20:50,055 INFO {'alloModel': 'HDPHMM', 'obsModel': 'AutoRegGauss', 'nTask': 1, 'hmm_hidden_state_amount': 5, 'startAlpha': 10.0, 'initname': 'randexamples', 'hmm_max_train_iteration': 1000, 'nBatch': 1, 'transAlpha': 5.0, 'ECovMat': 'covdata', 'alpha': 0.5, 'hmmKappa': 50.0, 'convergethr': 1e-09, 'sF': 1.0, 'gamma': 5.0, 'varMethod': 'memoVB'}
+2018-05-05 15:21:21,078 INFO                  precision    recall  f1-score   support
+
+OBJECT_SLIPPING       0.93      0.82      0.87        17
+ TOOL_COLLISION       0.68      1.00      0.81        32
+HUMAN_COLLISION       1.00      0.77      0.87        22
+      NO_OBJECT       1.00      0.43      0.60        14
+
+    avg / total       0.87      0.81      0.80        85
+
+2018-05-05 15:21:21,080 INFO {'alloModel': 'HDPHMM', 'obsModel': 'AutoRegGauss', 'nTask': 1, 'hmm_hidden_state_amount': 5, 'startAlpha': 10.0, 'initname': 'randexamples', 'hmm_max_train_iteration': 1000, 'nBatch': 1, 'transAlpha': 5.0, 'ECovMat': 'diagcovdata', 'alpha': 0.5, 'hmmKappa': 50.0, 'convergethr': 1e-09, 'sF': 1.0, 'gamma': 5.0, 'varMethod': 'memoVB'}
+2018-05-05 15:21:40,939 INFO                  precision    recall  f1-score   support
+
+OBJECT_SLIPPING       1.00      0.12      0.21        17
+ TOOL_COLLISION       0.44      1.00      0.61        32
+HUMAN_COLLISION       1.00      0.27      0.43        22
+      NO_OBJECT       1.00      0.29      0.44        14
+
+    avg / total       0.79      0.52      0.46        85
+
+2018-05-05 15:21:40,940 INFO {'alloModel': 'HDPHMM', 'obsModel': 'AutoRegGauss', 'nTask': 1, 'hmm_hidden_state_amount': 5, 'startAlpha': 10.0, 'initname': 'randexamples', 'hmm_max_train_iteration': 1000, 'nBatch': 1, 'transAlpha': 5.0, 'ECovMat': 'diagcovfirstdiff', 'alpha': 0.5, 'hmmKappa': 50.0, 'convergethr': 1e-09, 'sF': 1.0, 'gamma': 5.0, 'varMethod': 'memoVB'}
+2018-05-05 15:22:09,530 INFO                  precision    recall  f1-score   support
+
+OBJECT_SLIPPING       1.00      0.47      0.64        17
+ TOOL_COLLISION       0.59      1.00      0.74        32
+HUMAN_COLLISION       1.00      0.64      0.78        22
+      NO_OBJECT       1.00      0.64      0.78        14
+
+    avg / total       0.85      0.74      0.74        85
+
+2018-05-05 15:22:09,531 INFO {'alloModel': 'HDPHMM', 'obsModel': 'DiagGauss', 'nTask': 1, 'hmm_hidden_state_amount': 5, 'startAlpha': 10.0, 'initname': 'randexamples', 'hmm_max_train_iteration': 1000, 'nBatch': 1, 'transAlpha': 5.0, 'ECovMat': 'eye', 'alpha': 0.5, 'hmmKappa': 50.0, 'convergethr': 1e-09, 'sF': 1.0, 'gamma': 5.0, 'varMethod': 'memoVB'}
+2018-05-05 15:22:18,546 INFO                  precision    recall  f1-score   support
+
+OBJECT_SLIPPING       0.79      0.65      0.71        17
+ TOOL_COLLISION       0.58      0.97      0.73        32
+HUMAN_COLLISION       0.89      0.73      0.80        22
+      NO_OBJECT       0.00      0.00      0.00        14
+
+    avg / total       0.61      0.68      0.62        85
+
+2018-05-05 15:22:18,546 INFO {'alloModel': 'HDPHMM', 'obsModel': 'DiagGauss', 'nTask': 1, 'hmm_hidden_state_amount': 5, 'startAlpha': 10.0, 'initname': 'randexamples', 'hmm_max_train_iteration': 1000, 'nBatch': 1, 'transAlpha': 5.0, 'ECovMat': 'covdata', 'alpha': 0.5, 'hmmKappa': 50.0, 'convergethr': 1e-09, 'sF': 1.0, 'gamma': 5.0, 'varMethod': 'memoVB'}
+2018-05-05 15:22:34,191 INFO                  precision    recall  f1-score   support
+
+OBJECT_SLIPPING       0.94      0.88      0.91        17
+ TOOL_COLLISION       0.79      0.94      0.86        32
+HUMAN_COLLISION       0.95      0.91      0.93        22
+      NO_OBJECT       0.90      0.64      0.75        14
+
+    avg / total       0.88      0.87      0.87        85
+
+2018-05-05 15:22:34,191 INFO {'alloModel': 'HDPHMM', 'obsModel': 'DiagGauss', 'nTask': 1, 'hmm_hidden_state_amount': 5, 'startAlpha': 10.0, 'initname': 'randexamples', 'hmm_max_train_iteration': 1000, 'nBatch': 1, 'transAlpha': 5.0, 'ECovMat': 'diagcovdata', 'alpha': 0.5, 'hmmKappa': 50.0, 'convergethr': 1e-09, 'sF': 1.0, 'gamma': 5.0, 'varMethod': 'memoVB'}
+2018-05-05 15:22:49,633 INFO                  precision    recall  f1-score   support
+
+OBJECT_SLIPPING       0.94      0.88      0.91        17
+ TOOL_COLLISION       0.79      0.94      0.86        32
+HUMAN_COLLISION       0.95      0.91      0.93        22
+      NO_OBJECT       0.90      0.64      0.75        14
+
+    avg / total       0.88      0.87      0.87        85
+
+2018-05-05 15:22:49,634 INFO {'alloModel': 'HDPHMM', 'obsModel': 'DiagGauss', 'nTask': 1, 'hmm_hidden_state_amount': 5, 'startAlpha': 10.0, 'initname': 'randexamples', 'hmm_max_train_iteration': 1000, 'nBatch': 1, 'transAlpha': 5.0, 'ECovMat': 'diagcovfirstdiff', 'alpha': 0.5, 'hmmKappa': 50.0, 'convergethr': 1e-09, 'sF': 1.0, 'gamma': 5.0, 'varMethod': 'memoVB'}
+2018-05-05 15:23:06,497 INFO                  precision    recall  f1-score   support
+
+OBJECT_SLIPPING       0.94      0.88      0.91        17
+ TOOL_COLLISION       0.73      1.00      0.84        32
+HUMAN_COLLISION       1.00      0.82      0.90        22
+      NO_OBJECT       1.00      0.50      0.67        14
+
+    avg / total       0.88      0.85      0.84        85
+
+2018-05-05 15:23:06,497 INFO {'alloModel': 'HDPHMM', 'obsModel': 'Gauss', 'nTask': 1, 'hmm_hidden_state_amount': 5, 'startAlpha': 10.0, 'initname': 'randexamples', 'hmm_max_train_iteration': 1000, 'nBatch': 1, 'transAlpha': 5.0, 'ECovMat': 'eye', 'alpha': 0.5, 'hmmKappa': 50.0, 'convergethr': 1e-09, 'sF': 1.0, 'gamma': 5.0, 'varMethod': 'memoVB'}
+2018-05-05 15:23:24,498 INFO                  precision    recall  f1-score   support
+
+OBJECT_SLIPPING       0.83      0.88      0.86        17
+ TOOL_COLLISION       0.76      1.00      0.86        32
+HUMAN_COLLISION       0.95      0.86      0.90        22
+      NO_OBJECT       0.80      0.29      0.42        14
+
+    avg / total       0.83      0.82      0.80        85
+
+2018-05-05 15:23:24,500 INFO {'alloModel': 'HDPHMM', 'obsModel': 'Gauss', 'nTask': 1, 'hmm_hidden_state_amount': 5, 'startAlpha': 10.0, 'initname': 'randexamples', 'hmm_max_train_iteration': 1000, 'nBatch': 1, 'transAlpha': 5.0, 'ECovMat': 'covdata', 'alpha': 0.5, 'hmmKappa': 50.0, 'convergethr': 1e-09, 'sF': 1.0, 'gamma': 5.0, 'varMethod': 'memoVB'}
+2018-05-05 15:23:45,349 INFO                  precision    recall  f1-score   support
+
+OBJECT_SLIPPING       0.78      0.82      0.80        17
+ TOOL_COLLISION       0.78      1.00      0.88        32
+HUMAN_COLLISION       1.00      0.77      0.87        22
+      NO_OBJECT       1.00      0.64      0.78        14
+
+    avg / total       0.87      0.85      0.84        85
+
+2018-05-05 15:23:45,351 INFO {'alloModel': 'HDPHMM', 'obsModel': 'Gauss', 'nTask': 1, 'hmm_hidden_state_amount': 5, 'startAlpha': 10.0, 'initname': 'randexamples', 'hmm_max_train_iteration': 1000, 'nBatch': 1, 'transAlpha': 5.0, 'ECovMat': 'diagcovdata', 'alpha': 0.5, 'hmmKappa': 50.0, 'convergethr': 1e-09, 'sF': 1.0, 'gamma': 5.0, 'varMethod': 'memoVB'}
+2018-05-05 15:24:01,780 INFO                  precision    recall  f1-score   support
+
+OBJECT_SLIPPING       1.00      0.88      0.94        17
+ TOOL_COLLISION       0.76      1.00      0.86        32
+HUMAN_COLLISION       1.00      0.82      0.90        22
+      NO_OBJECT       1.00      0.71      0.83        14
+
+    avg / total       0.91      0.88      0.88        85
+
+2018-05-05 15:24:01,782 INFO {'alloModel': 'HDPHMM', 'obsModel': 'Gauss', 'nTask': 1, 'hmm_hidden_state_amount': 5, 'startAlpha': 10.0, 'initname': 'randexamples', 'hmm_max_train_iteration': 1000, 'nBatch': 1, 'transAlpha': 5.0, 'ECovMat': 'diagcovfirstdiff', 'alpha': 0.5, 'hmmKappa': 50.0, 'convergethr': 1e-09, 'sF': 1.0, 'gamma': 5.0, 'varMethod': 'memoVB'}
+2018-05-05 15:24:19,456 INFO                  precision    recall  f1-score   support
+
+OBJECT_SLIPPING       0.88      0.88      0.88        17
+ TOOL_COLLISION       0.74      1.00      0.85        32
+HUMAN_COLLISION       1.00      0.91      0.95        22
+      NO_OBJECT       1.00      0.36      0.53        14
+
+    avg / total       0.88      0.85      0.83        85
+
+2018-05-05 15:24:19,458 INFO {'alloModel': 'HDPHMM', 'obsModel': 'ZeroMeanGauss', 'nTask': 1, 'hmm_hidden_state_amount': 5, 'startAlpha': 10.0, 'initname': 'randexamples', 'hmm_max_train_iteration': 1000, 'nBatch': 1, 'transAlpha': 5.0, 'ECovMat': 'eye', 'alpha': 0.5, 'hmmKappa': 50.0, 'convergethr': 1e-09, 'sF': 1.0, 'gamma': 5.0, 'varMethod': 'memoVB'}
+2018-05-05 15:24:32,924 INFO                  precision    recall  f1-score   support
+
+OBJECT_SLIPPING       0.88      0.88      0.88        17
+ TOOL_COLLISION       0.78      1.00      0.88        32
+HUMAN_COLLISION       0.91      0.91      0.91        22
+      NO_OBJECT       1.00      0.36      0.53        14
+
+    avg / total       0.87      0.85      0.83        85
+
+2018-05-05 15:24:32,925 INFO {'alloModel': 'HDPHMM', 'obsModel': 'ZeroMeanGauss', 'nTask': 1, 'hmm_hidden_state_amount': 5, 'startAlpha': 10.0, 'initname': 'randexamples', 'hmm_max_train_iteration': 1000, 'nBatch': 1, 'transAlpha': 5.0, 'ECovMat': 'covdata', 'alpha': 0.5, 'hmmKappa': 50.0, 'convergethr': 1e-09, 'sF': 1.0, 'gamma': 5.0, 'varMethod': 'memoVB'}
+2018-05-05 15:24:56,088 INFO                  precision    recall  f1-score   support
+
+OBJECT_SLIPPING       0.71      0.88      0.79        17
+ TOOL_COLLISION       0.91      1.00      0.96        32
+HUMAN_COLLISION       1.00      0.86      0.93        22
+      NO_OBJECT       1.00      0.71      0.83        14
+
+    avg / total       0.91      0.89      0.89        85
+
+2018-05-05 15:24:56,090 INFO {'alloModel': 'HDPHMM', 'obsModel': 'ZeroMeanGauss', 'nTask': 1, 'hmm_hidden_state_amount': 5, 'startAlpha': 10.0, 'initname': 'randexamples', 'hmm_max_train_iteration': 1000, 'nBatch': 1, 'transAlpha': 5.0, 'ECovMat': 'diagcovdata', 'alpha': 0.5, 'hmmKappa': 50.0, 'convergethr': 1e-09, 'sF': 1.0, 'gamma': 5.0, 'varMethod': 'memoVB'}
+2018-05-05 15:25:16,943 INFO                  precision    recall  f1-score   support
+
+OBJECT_SLIPPING       0.93      0.82      0.87        17
+ TOOL_COLLISION       0.74      1.00      0.85        32
+HUMAN_COLLISION       1.00      0.77      0.87        22
+      NO_OBJECT       1.00      0.71      0.83        14
+
+    avg / total       0.89      0.86      0.86        85
+
+2018-05-05 15:25:16,945 INFO {'alloModel': 'HDPHMM', 'obsModel': 'ZeroMeanGauss', 'nTask': 1, 'hmm_hidden_state_amount': 5, 'startAlpha': 10.0, 'initname': 'randexamples', 'hmm_max_train_iteration': 1000, 'nBatch': 1, 'transAlpha': 5.0, 'ECovMat': 'diagcovfirstdiff', 'alpha': 0.5, 'hmmKappa': 50.0, 'convergethr': 1e-09, 'sF': 1.0, 'gamma': 5.0, 'varMethod': 'memoVB'}
+2018-05-05 15:25:35,893 INFO                  precision    recall  f1-score   support
+
+OBJECT_SLIPPING       0.76      0.94      0.84        17
+ TOOL_COLLISION       0.80      1.00      0.89        32
+HUMAN_COLLISION       1.00      0.82      0.90        22
+      NO_OBJECT       1.00      0.43      0.60        14
+
+    avg / total       0.88      0.85      0.83        85
+
+2018-05-11 20:24:09,315 INFO -------------------------generate_classification_performance_logging_report_with_varible_model_parameters---------------------------------------------
+2018-05-11 20:24:09,329 INFO {'alloModel': 'HDPHMM', 'obsModel': 'AutoRegGauss', 'nTask': 5, 'hmm_hidden_state_amount': 5, 'startAlpha': 10.0, 'initname': 'randexamples', 'hmm_max_train_iteration': 1000, 'nBatch': 1, 'transAlpha': 5.0, 'ECovMat': 'eye', 'alpha': 0.5, 'hmmKappa': 50.0, 'convergethr': 1e-09, 'sF': 1.0, 'gamma': 5.0, 'varMethod': 'memoVB'}
+2018-05-11 20:26:47,028 INFO                  precision    recall  f1-score   support
+
+OBJECT_SLIPPING       1.00      0.71      0.83        17
+ TOOL_COLLISION       0.70      1.00      0.82        32
+HUMAN_COLLISION       1.00      0.82      0.90        22
+      NO_OBJECT       1.00      0.64      0.78        14
+
+    avg / total       0.89      0.84      0.84        85
+
+2018-05-11 20:26:47,035 INFO {'alloModel': 'HDPHMM', 'obsModel': 'AutoRegGauss', 'nTask': 5, 'hmm_hidden_state_amount': 5, 'startAlpha': 10.0, 'initname': 'randexamples', 'hmm_max_train_iteration': 1000, 'nBatch': 1, 'transAlpha': 5.0, 'ECovMat': 'covdata', 'alpha': 0.5, 'hmmKappa': 50.0, 'convergethr': 1e-09, 'sF': 1.0, 'gamma': 5.0, 'varMethod': 'memoVB'}
+2018-05-11 20:29:42,518 INFO                  precision    recall  f1-score   support
+
+OBJECT_SLIPPING       0.86      0.35      0.50        17
+ TOOL_COLLISION       0.60      1.00      0.75        32
+HUMAN_COLLISION       1.00      0.77      0.87        22
+      NO_OBJECT       1.00      0.57      0.73        14
+
+    avg / total       0.82      0.74      0.73        85
+
+2018-05-11 20:29:42,519 INFO {'alloModel': 'HDPHMM', 'obsModel': 'AutoRegGauss', 'nTask': 5, 'hmm_hidden_state_amount': 5, 'startAlpha': 10.0, 'initname': 'randexamples', 'hmm_max_train_iteration': 1000, 'nBatch': 1, 'transAlpha': 5.0, 'ECovMat': 'diagcovdata', 'alpha': 0.5, 'hmmKappa': 50.0, 'convergethr': 1e-09, 'sF': 1.0, 'gamma': 5.0, 'varMethod': 'memoVB'}
+2018-05-11 20:32:04,476 INFO                  precision    recall  f1-score   support
+
+OBJECT_SLIPPING       1.00      0.59      0.74        17
+ TOOL_COLLISION       0.59      1.00      0.74        32
+HUMAN_COLLISION       1.00      0.77      0.87        22
+      NO_OBJECT       1.00      0.29      0.44        14
+
+    avg / total       0.85      0.74      0.73        85
+
+2018-05-11 20:32:04,483 INFO {'alloModel': 'HDPHMM', 'obsModel': 'AutoRegGauss', 'nTask': 5, 'hmm_hidden_state_amount': 5, 'startAlpha': 10.0, 'initname': 'randexamples', 'hmm_max_train_iteration': 1000, 'nBatch': 1, 'transAlpha': 5.0, 'ECovMat': 'diagcovfirstdiff', 'alpha': 0.5, 'hmmKappa': 50.0, 'convergethr': 1e-09, 'sF': 1.0, 'gamma': 5.0, 'varMethod': 'memoVB'}
+2018-05-11 20:34:49,399 INFO                  precision    recall  f1-score   support
+
+OBJECT_SLIPPING       1.00      0.47      0.64        17
+ TOOL_COLLISION       0.62      1.00      0.76        32
+HUMAN_COLLISION       1.00      0.73      0.84        22
+      NO_OBJECT       1.00      0.64      0.78        14
+
+    avg / total       0.86      0.76      0.76        85
+
+2018-05-11 20:34:49,400 INFO {'alloModel': 'HDPHMM', 'obsModel': 'DiagGauss', 'nTask': 5, 'hmm_hidden_state_amount': 5, 'startAlpha': 10.0, 'initname': 'randexamples', 'hmm_max_train_iteration': 1000, 'nBatch': 1, 'transAlpha': 5.0, 'ECovMat': 'eye', 'alpha': 0.5, 'hmmKappa': 50.0, 'convergethr': 1e-09, 'sF': 1.0, 'gamma': 5.0, 'varMethod': 'memoVB'}
+2018-05-11 20:35:49,329 INFO                  precision    recall  f1-score   support
+
+OBJECT_SLIPPING       0.85      0.65      0.73        17
+ TOOL_COLLISION       0.60      0.97      0.74        32
+HUMAN_COLLISION       0.89      0.77      0.83        22
+      NO_OBJECT       1.00      0.07      0.13        14
+
+    avg / total       0.79      0.71      0.66        85
+
+2018-05-11 20:35:49,330 INFO {'alloModel': 'HDPHMM', 'obsModel': 'DiagGauss', 'nTask': 5, 'hmm_hidden_state_amount': 5, 'startAlpha': 10.0, 'initname': 'randexamples', 'hmm_max_train_iteration': 1000, 'nBatch': 1, 'transAlpha': 5.0, 'ECovMat': 'covdata', 'alpha': 0.5, 'hmmKappa': 50.0, 'convergethr': 1e-09, 'sF': 1.0, 'gamma': 5.0, 'varMethod': 'memoVB'}
+2018-05-11 20:37:30,991 INFO                  precision    recall  f1-score   support
+
+OBJECT_SLIPPING       0.94      0.88      0.91        17
+ TOOL_COLLISION       0.81      0.94      0.87        32
+HUMAN_COLLISION       0.95      0.91      0.93        22
+      NO_OBJECT       0.91      0.71      0.80        14
+
+    avg / total       0.89      0.88      0.88        85
+
+2018-05-11 20:37:30,992 INFO {'alloModel': 'HDPHMM', 'obsModel': 'DiagGauss', 'nTask': 5, 'hmm_hidden_state_amount': 5, 'startAlpha': 10.0, 'initname': 'randexamples', 'hmm_max_train_iteration': 1000, 'nBatch': 1, 'transAlpha': 5.0, 'ECovMat': 'diagcovdata', 'alpha': 0.5, 'hmmKappa': 50.0, 'convergethr': 1e-09, 'sF': 1.0, 'gamma': 5.0, 'varMethod': 'memoVB'}
+2018-05-11 20:39:13,151 INFO                  precision    recall  f1-score   support
+
+OBJECT_SLIPPING       0.94      0.88      0.91        17
+ TOOL_COLLISION       0.81      0.94      0.87        32
+HUMAN_COLLISION       0.95      0.91      0.93        22
+      NO_OBJECT       0.91      0.71      0.80        14
+
+    avg / total       0.89      0.88      0.88        85
+
+2018-05-11 20:39:13,151 INFO {'alloModel': 'HDPHMM', 'obsModel': 'DiagGauss', 'nTask': 5, 'hmm_hidden_state_amount': 5, 'startAlpha': 10.0, 'initname': 'randexamples', 'hmm_max_train_iteration': 1000, 'nBatch': 1, 'transAlpha': 5.0, 'ECovMat': 'diagcovfirstdiff', 'alpha': 0.5, 'hmmKappa': 50.0, 'convergethr': 1e-09, 'sF': 1.0, 'gamma': 5.0, 'varMethod': 'memoVB'}
+2018-05-11 20:40:44,241 INFO                  precision    recall  f1-score   support
+
+OBJECT_SLIPPING       0.93      0.82      0.87        17
+ TOOL_COLLISION       0.74      1.00      0.85        32
+HUMAN_COLLISION       1.00      0.91      0.95        22
+      NO_OBJECT       1.00      0.50      0.67        14
+
+    avg / total       0.89      0.86      0.85        85
+
+2018-05-11 20:40:44,242 INFO {'alloModel': 'HDPHMM', 'obsModel': 'Gauss', 'nTask': 5, 'hmm_hidden_state_amount': 5, 'startAlpha': 10.0, 'initname': 'randexamples', 'hmm_max_train_iteration': 1000, 'nBatch': 1, 'transAlpha': 5.0, 'ECovMat': 'eye', 'alpha': 0.5, 'hmmKappa': 50.0, 'convergethr': 1e-09, 'sF': 1.0, 'gamma': 5.0, 'varMethod': 'memoVB'}
+2018-05-11 20:42:46,545 INFO                  precision    recall  f1-score   support
+
+OBJECT_SLIPPING       0.89      0.94      0.91        17
+ TOOL_COLLISION       0.82      1.00      0.90        32
+HUMAN_COLLISION       1.00      0.86      0.93        22
+      NO_OBJECT       1.00      0.64      0.78        14
+
+    avg / total       0.91      0.89      0.89        85
+
+2018-05-11 20:42:46,546 INFO {'alloModel': 'HDPHMM', 'obsModel': 'Gauss', 'nTask': 5, 'hmm_hidden_state_amount': 5, 'startAlpha': 10.0, 'initname': 'randexamples', 'hmm_max_train_iteration': 1000, 'nBatch': 1, 'transAlpha': 5.0, 'ECovMat': 'covdata', 'alpha': 0.5, 'hmmKappa': 50.0, 'convergethr': 1e-09, 'sF': 1.0, 'gamma': 5.0, 'varMethod': 'memoVB'}
+2018-05-11 20:45:06,924 INFO                  precision    recall  f1-score   support
+
+OBJECT_SLIPPING       0.73      0.94      0.82        17
+ TOOL_COLLISION       0.89      0.97      0.93        32
+HUMAN_COLLISION       1.00      0.86      0.93        22
+      NO_OBJECT       1.00      0.64      0.78        14
+
+    avg / total       0.90      0.88      0.88        85
+
+2018-05-11 20:45:06,932 INFO {'alloModel': 'HDPHMM', 'obsModel': 'Gauss', 'nTask': 5, 'hmm_hidden_state_amount': 5, 'startAlpha': 10.0, 'initname': 'randexamples', 'hmm_max_train_iteration': 1000, 'nBatch': 1, 'transAlpha': 5.0, 'ECovMat': 'diagcovdata', 'alpha': 0.5, 'hmmKappa': 50.0, 'convergethr': 1e-09, 'sF': 1.0, 'gamma': 5.0, 'varMethod': 'memoVB'}
+2018-05-11 20:47:07,883 INFO                  precision    recall  f1-score   support
+
+OBJECT_SLIPPING       0.73      0.94      0.82        17
+ TOOL_COLLISION       0.86      0.94      0.90        32
+HUMAN_COLLISION       0.91      0.91      0.91        22
+      NO_OBJECT       1.00      0.43      0.60        14
+
+    avg / total       0.87      0.85      0.84        85
+
+2018-05-11 20:47:07,884 INFO {'alloModel': 'HDPHMM', 'obsModel': 'Gauss', 'nTask': 5, 'hmm_hidden_state_amount': 5, 'startAlpha': 10.0, 'initname': 'randexamples', 'hmm_max_train_iteration': 1000, 'nBatch': 1, 'transAlpha': 5.0, 'ECovMat': 'diagcovfirstdiff', 'alpha': 0.5, 'hmmKappa': 50.0, 'convergethr': 1e-09, 'sF': 1.0, 'gamma': 5.0, 'varMethod': 'memoVB'}
+2018-05-11 20:48:58,044 INFO                  precision    recall  f1-score   support
+
+OBJECT_SLIPPING       0.83      0.88      0.86        17
+ TOOL_COLLISION       0.73      1.00      0.84        32
+HUMAN_COLLISION       1.00      0.86      0.93        22
+      NO_OBJECT       1.00      0.29      0.44        14
+
+    avg / total       0.86      0.82      0.80        85
+
+2018-05-11 20:48:58,045 INFO {'alloModel': 'HDPHMM', 'obsModel': 'ZeroMeanGauss', 'nTask': 5, 'hmm_hidden_state_amount': 5, 'startAlpha': 10.0, 'initname': 'randexamples', 'hmm_max_train_iteration': 1000, 'nBatch': 1, 'transAlpha': 5.0, 'ECovMat': 'eye', 'alpha': 0.5, 'hmmKappa': 50.0, 'convergethr': 1e-09, 'sF': 1.0, 'gamma': 5.0, 'varMethod': 'memoVB'}
+2018-05-11 20:50:34,762 INFO                  precision    recall  f1-score   support
+
+OBJECT_SLIPPING       0.84      0.94      0.89        17
+ TOOL_COLLISION       0.89      1.00      0.94        32
+HUMAN_COLLISION       0.95      0.91      0.93        22
+      NO_OBJECT       1.00      0.64      0.78        14
+
+    avg / total       0.91      0.91      0.90        85
+
+2018-05-11 20:50:34,769 INFO {'alloModel': 'HDPHMM', 'obsModel': 'ZeroMeanGauss', 'nTask': 5, 'hmm_hidden_state_amount': 5, 'startAlpha': 10.0, 'initname': 'randexamples', 'hmm_max_train_iteration': 1000, 'nBatch': 1, 'transAlpha': 5.0, 'ECovMat': 'covdata', 'alpha': 0.5, 'hmmKappa': 50.0, 'convergethr': 1e-09, 'sF': 1.0, 'gamma': 5.0, 'varMethod': 'memoVB'}
+2018-05-11 20:53:03,711 INFO                  precision    recall  f1-score   support
+
+OBJECT_SLIPPING       0.80      0.94      0.86        17
+ TOOL_COLLISION       0.74      1.00      0.85        32
+HUMAN_COLLISION       1.00      0.77      0.87        22
+      NO_OBJECT       1.00      0.36      0.53        14
+
+    avg / total       0.86      0.82      0.81        85
+
+2018-05-11 20:53:03,713 INFO {'alloModel': 'HDPHMM', 'obsModel': 'ZeroMeanGauss', 'nTask': 5, 'hmm_hidden_state_amount': 5, 'startAlpha': 10.0, 'initname': 'randexamples', 'hmm_max_train_iteration': 1000, 'nBatch': 1, 'transAlpha': 5.0, 'ECovMat': 'diagcovdata', 'alpha': 0.5, 'hmmKappa': 50.0, 'convergethr': 1e-09, 'sF': 1.0, 'gamma': 5.0, 'varMethod': 'memoVB'}
+2018-05-11 20:55:18,637 INFO                  precision    recall  f1-score   support
+
+OBJECT_SLIPPING       0.79      0.88      0.83        17
+ TOOL_COLLISION       0.80      1.00      0.89        32
+HUMAN_COLLISION       1.00      0.82      0.90        22
+      NO_OBJECT       1.00      0.57      0.73        14
+
+    avg / total       0.88      0.86      0.85        85
+
+2018-05-11 20:55:18,639 INFO {'alloModel': 'HDPHMM', 'obsModel': 'ZeroMeanGauss', 'nTask': 5, 'hmm_hidden_state_amount': 5, 'startAlpha': 10.0, 'initname': 'randexamples', 'hmm_max_train_iteration': 1000, 'nBatch': 1, 'transAlpha': 5.0, 'ECovMat': 'diagcovfirstdiff', 'alpha': 0.5, 'hmmKappa': 50.0, 'convergethr': 1e-09, 'sF': 1.0, 'gamma': 5.0, 'varMethod': 'memoVB'}
+2018-05-11 20:57:34,710 INFO                  precision    recall  f1-score   support
+
+OBJECT_SLIPPING       0.80      0.94      0.86        17
+ TOOL_COLLISION       0.84      1.00      0.91        32
+HUMAN_COLLISION       1.00      0.95      0.98        22
+      NO_OBJECT       1.00      0.43      0.60        14
+
+    avg / total       0.90      0.88      0.87        85
+

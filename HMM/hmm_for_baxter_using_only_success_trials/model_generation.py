@@ -212,8 +212,18 @@ def get_model_generator(model_type, model_config):
                                     'obsModel':  obsModel,
                                     'ECovMat' :  ECovMat,
                                     'varMethod': varMethod,
-                                    'hmm_hidden_state_amount': n_components,
                                     'hmm_max_train_iteration': n_iter,
+                                    'hmm_hidden_state_amount': n_components,
+                                    'nTask'        :  model.nTask,
+                                    'nBatch'       :  model.nBatch,
+                                    'convergethr'  :  model.convergethr,
+                                    'alpha'        :  model.alpha,
+                                    'gamma'        :  model.gamma,
+                                    'transAlpha'   :  model.transAlpha,
+                                    'startAlpha'   :  model.startAlpha,
+                                    'hmmKappa'     :  model.hmmKappa,
+                                    'sF'           :  model.sF,
+                                    'initname'     :  model.initname,
                                 }
 
                                 yield model, now_model_config

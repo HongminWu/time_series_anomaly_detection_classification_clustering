@@ -13,7 +13,7 @@ class HongminHMM():
         varMethod,
         n_iteration,
         K,
-        nTask       = 1,
+        nTask       = 5,
         nBatch      = 1,
         convergethr = 0.000000001, #for memoVB
         alpha       = 0.5, 
@@ -23,13 +23,15 @@ class HongminHMM():
         sF          = 1.0,
         hmmKappa    = 50.0,
         initname    = 'randexamples',
-        printEvery  = 10):
+        printEvery  = 10
+        ):
 
         self.alloModel    = alloModel
         self.obsModel     = obsModel
         self.ECovMat      = ECovMat
         self.varMethod    = varMethod
         self.n_iteration  = n_iteration
+        self.K            = K
         self.nTask        = nTask
         self.nBatch       = nBatch
         self.convergethr  = convergethr
@@ -39,12 +41,11 @@ class HongminHMM():
         self.startAlpha   = startAlpha
         self.hmmKappa     = hmmKappa
         self.sF           = sF
-        self.K            = K
         self.initname     = initname
+        self.printEvery   = printEvery
         self.fwdlattice   = None
         self.preSample    = None
         self.work_buffer  = np.zeros(K)
-        self.printEvery   = printEvery
 
     def fit(self, X, lengths):
         '''
@@ -277,7 +278,7 @@ class HongminHMM():
             seq_id,
             zhat_T     = None,
             z_img_cmap = None,
-            ylim       = [-6, 6],
+            ylim       = [-120, 120],
             K          = 5,
             left       = 0.2,
             bottom     = 0.2,
@@ -315,7 +316,7 @@ class HongminHMM():
         for dim in xrange(dataset.dim):
             ax_handles[0].plot(curX_TD[:, dim], '.-')
         ax_handles[0].set_ylabel('Features')
-        ax_handles[0].set_ylim(ylim)
+        #ax_handles[0].set_ylim(ylim)
         z_img_height = int(np.ceil(ylim[1] - ylim[0]))
         plt.subplots_adjust(
             wspace=0.1,
@@ -329,11 +330,11 @@ class HongminHMM():
             ax_handles[1].imshow(
                 img_TD,
                 interpolation='nearest',
-                vmin=-0.5,
-                vmax=(K-1)+0.5,
+                #vmin=-0.5,
+                #vmax=(K-1)+0.5,
                 cmap=z_img_cmap)
-            ax_handles[1].set_ylim(0, z_img_height)
-            ax_handles[1].set_yticks([])
+            #ax_handles[1].set_ylim(0, z_img_height)
+            #ax_handles[1].set_yticks([])
             # z legend
             bbox = ax_handles[1].get_position()
             width = (1.0 - bbox.x1) / 3

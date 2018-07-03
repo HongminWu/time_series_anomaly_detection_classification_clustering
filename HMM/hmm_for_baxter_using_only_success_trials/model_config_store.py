@@ -85,6 +85,18 @@ model_store = {
                # covfirstdiff only applies to auto-regressive datasets
                 'varMethod' : 'memoVB',
             },
+
+            
+            
+            'optimal': {
+                'hmm_max_train_iteration': 1000,
+                'hmm_hidden_state_amount': 5,
+                'alloModel' : 'HDPHMM',     
+                'obsModel'  : 'ZeroMeanGauss',
+                'ECovMat'   : ['covdata'],
+                'varMethod' : 'memoVB',
+            },
+            
             
             'ar': {
                 'hmm_max_train_iteration': 1000,
