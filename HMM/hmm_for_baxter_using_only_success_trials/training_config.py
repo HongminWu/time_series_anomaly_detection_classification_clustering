@@ -181,7 +181,7 @@ config_by_user = {
     'nFeatures'               : len(interested_data_fields) - 1,
     'interested_data_fields'  :  interested_data_fields,
     'data_type_chosen'        :  ', '.join(modality_chosen),    
-    'model_type_chosen'       :  model_type_options[0],
+    'model_type_chosen'       :  model_type_options[1],
     'score_metric'            : '_score_metric_last_time_stdmeanratio_',
     'anomaly_detection_metric': anomaly_detection_metric_options[1],
 

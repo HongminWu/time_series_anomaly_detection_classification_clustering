@@ -38,13 +38,13 @@ if __name__=='__main__':
     # flatten the observation
     X = []
     for i in range(x_train.shape[0]):
-        X.append(x_train[i].flatten('F')) # default 'C' flatten in row order, 'F' flatten in column order
+        X.append(x_train[i].flatten('C')) # default 'C' flatten in row order, 'F' flatten in column order
     x_train = []
     x_train = np.array(X)
         
     X = []
     for i in range(x_test.shape[0]):
-        X.append(x_test[i].flatten('F'))   # default 'C' flatten in row order, 'F' flatten in column order
+        X.append(x_test[i].flatten('C'))   # default 'C' flatten in row order, 'F' flatten in column order
     x_test = []
     x_test = np.array(X)
     labels = labels.tolist()
@@ -55,9 +55,9 @@ if __name__=='__main__':
     print classes
 
     #---
-    plot_in_high_dimensional_space(x_train, x_test, y_train, y_test)
-    print 'only for plotting test'
-    sys.exit()
+    #plot_in_high_dimensional_space(x_train, x_test, y_train, y_test)
+    #print 'only for plotting test'
+    #sys.exit()
     
     # Visualizing sample observations from the HAR dataset
     plt.figure(figsize=(11,37))

@@ -1,7 +1,6 @@
 from snap import *
 from cvxpy import *
 
-
 import math
 import multiprocessing
 import numpy
@@ -107,7 +106,7 @@ class TGraphVX(TUNGraph):
     # Option to use serial version or distributed ADMM.
     # maxIters optional parameter: Maximum iterations for distributed ADMM.
     def Solve(self, M=Minimize, UseADMM=True, NumProcessors=0, Rho=1.0,
-              MaxIters=250, EpsAbs=0.01, EpsRel=0.01, Verbose=False,
+              MaxIters=250, EpsAbs=0.01, EpsRel=0.01, Verbose=False, 
               UseClustering = False, ClusterSize = 1000 ):
         global m_func
         m_func = M
@@ -167,7 +166,7 @@ class TGraphVX(TUNGraph):
             self.node_values[nid] = value
 
     """Function to solve cluster wise optimization problem"""
-    def __SolveClusterADMM(self,M,UseADMM,superNodes,numProcessors, rho_param,
+    def __SolveClusterADMM(self,M,UseADMM,superNodes,numProcessors, rho_param, 
                            maxIters, eps_abs, eps_rel,verbose):
         #initialize an empty supergraph
         supergraph = TGraphVX()
@@ -185,8 +184,8 @@ class TGraphVX(TUNGraph):
         superNodeVariables = {}
         superNodeValues = {}
         varToSuperVarMap = {}
-        """traverse through the list of edges and add each edge's constraint and objective to
-        either the supernode to which it belongs or the superedge which connects the ends
+        """traverse through the list of edges and add each edge's constraint and objective to 
+        either the supernode to which it belongs or the superedge which connects the ends 
         of the supernodes to which it belongs"""
         for ei in self.Edges():
             etup = self.__GetEdgeTup(ei.GetSrcNId(), ei.GetDstNId())
@@ -238,28 +237,28 @@ class TGraphVX(TUNGraph):
                                            for k in xrange(__builtin__.len(superNodeVariables[supernid])) ])
                     superNodeVariables[supernid] += [(varId, superVarName, var, superNodeOffset)]
                     superNodeValues[supernid] = numpy.concatenate((superNodeValues[supernid],value))
-
+                
         #add all supernodes to the supergraph
         for supernid in superNodeConstraints:
             supergraph.AddNode(supernid, superNodeObjectives[supernid], \
                                superNodeConstraints[supernid])
             supergraph.node_variables[supernid] = superNodeVariables[supernid]
             supergraph.node_values[supernid] = superNodeValues[supernid]
-
-        #add all superedges to the supergraph
+                        
+        #add all superedges to the supergraph    
         for superei in superEdgeConstraints:
             superSrcId,superDstId = superei
             supergraph.AddEdge(superSrcId, superDstId, None,\
                                superEdgeObjectives[superei],\
                                 superEdgeConstraints[superei])
-
+                 
         #call solver for this supergraph
         if UseADMM and supergraph.GetEdges() != 0:
             supergraph.__SolveADMM(numProcessors, rho_param, maxIters, eps_abs, eps_rel, verbose)
         else:
             supergraph.Solve(M, False, numProcessors, rho_param, maxIters, eps_abs, eps_rel, verbose,
                              UseClustering=False)
-
+        
         self.status = supergraph.status
         self.value = supergraph.value
         for ni in self.Nodes():
@@ -270,7 +269,7 @@ class TGraphVX(TUNGraph):
                 superVarName = varToSuperVarMap[(nid,varName)]
                 self.node_values[nid] = numpy.concatenate((self.node_values[nid],\
                                                           supergraph.GetNodeValue(snid, superVarName[1])))
-
+                    
     # Implementation of distributed ADMM
     # Uses a global value of rho_param for rho
     # Will run for a maximum of maxIters iterations
@@ -786,7 +785,7 @@ class TGraphVX(TUNGraph):
                     self.SetEdgeObjective(etup[0], etup[1], ret)
         infile.close()
 
-    """return clusters of nodes of the original graph.Each cluster corresponds to
+    """return clusters of nodes of the original graph.Each cluster corresponds to 
     a supernode in the supergraph"""
     def __ClusterGraph(self,clusterSize):
         #obtain a random shuffle of the nodes
@@ -802,7 +801,7 @@ class TGraphVX(TUNGraph):
                 oddLevel, evenLevel, isOdd = [],[],True
                 oddLevel.append(nid)
                 visitedNode[nid] = True
-                #do a level order traversal and add nodes to the superNode until the
+                #do a level order traversal and add nodes to the superNode until the 
                 #size of the supernode variables gets larger than clusterSize
                 while True:
                     if isOdd:
@@ -959,26 +958,26 @@ def Prox_logdet(S, A, eta):
     d, q = numpy.linalg.eigh(eta*A-S)
     q = numpy.matrix(q)
     X_var = ( 1/(2*float(eta)) )*q*( numpy.diag(d + numpy.sqrt(numpy.square(d) + (4*eta)*numpy.ones(d.shape))) )*q.T
-    x_var = X_var[numpy.triu_indices(S.shape[1])] # extract upper triangular part as update variable
+    x_var = X_var[numpy.triu_indices(S.shape[1])] # extract upper triangular part as update variable      
 
     return numpy.matrix(x_var).T
 
 def upper2Full(a):
-    n = int((-1  + numpy.sqrt(1+ 8*a.shape[0]))/2)
+    n = int((-1  + numpy.sqrt(1+ 8*a.shape[0]))/2)  
     A = numpy.zeros([n,n])
-    A[numpy.triu_indices(n)] = a
+    A[numpy.triu_indices(n)] = a 
     temp = A.diagonal()
-    A = (A + A.T) - numpy.diag(temp)
-    return A
+    A = (A + A.T) - numpy.diag(temp)             
+    return A   
 
 def ij2symmetric(i,j,size):
     return (size * (size + 1))/2 - (size-i)*((size - i + 1))/2 + j - i
-
+    
 # x-update for ADMM for one node
 def ADMM_x(entry):
     global rho
     variables = entry[X_VARS]
-
+    
     #-----------------------Proximal operator ---------------------------
     x_update = [] # proximal update for the variable x
     if(__builtin__.len(entry[1].args) > 1 ):
@@ -987,19 +986,19 @@ def ADMM_x(entry):
         numpymat = cvxpyMat.value
 
         mat_shape = ( int( numpymat.shape[1] *  ( numpymat.shape[1]+1 )/2.0 ) ,)
-        a = numpy.zeros(mat_shape)
+        a = numpy.zeros(mat_shape) 
 
-        for i in xrange(entry[X_DEG]):
+        for i in xrange(entry[X_DEG]):  
             z_index = X_NEIGHBORS + (2 * i)
             u_index = z_index + 1
             zi = entry[z_index]
             ui = entry[u_index]
-
+            
             for (varID, varName, var, offset) in variables:
-
+                 
                 z = getValue(edge_z_vals, zi + offset, var.size[0])
                 u = getValue(edge_u_vals, ui + offset, var.size[0])
-                a += (z-u)
+                a += (z-u) 
         A = upper2Full(a)
         A =  A/entry[X_DEG]
         eta = 1/float(rho)
@@ -1007,7 +1006,7 @@ def ADMM_x(entry):
         x_update = Prox_logdet(numpymat, A, eta)
         solution = numpy.array(x_update).T.reshape(-1)
 
-        writeValue(node_vals, entry[X_IND] + variables[0][3], solution, variables[0][2].size[0])
+        writeValue(node_vals, entry[X_IND] + variables[0][3], solution, variables[0][2].size[0]) 
     else:
         x_update = [] # no variable to update for dummy node
     return None
@@ -1015,10 +1014,10 @@ def ADMM_x(entry):
 # z-update for ADMM for one edge
 def ADMM_z(entry, index_penalty = 1):
     global rho
-
+    
     rho = float(rho)
     #-----------------------Proximal operator ---------------------------
-    a_ij = [] #
+    a_ij = [] # 
     flag = 0
     variables_i = entry[Z_IVARS]
     for (varID, varName, var, offset) in variables_i:
@@ -1028,7 +1027,7 @@ def ADMM_z(entry, index_penalty = 1):
             a_ij = (x_i + u_ij)
             flag = 1
         else:
-            a_ij += (x_i + u_ij)
+            a_ij += (x_i + u_ij) 
 
     lamb = entry[1].args[0].args[0].value
     numBlocks = entry[1].args[1].args[0].value

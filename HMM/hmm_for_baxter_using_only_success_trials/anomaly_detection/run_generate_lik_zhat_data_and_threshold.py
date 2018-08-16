@@ -1,7 +1,7 @@
 '''
 @HongminWu April-21, 2018
 This script for testing a new anomaly detector.
-step-1: train the normial models for each skill
+step-1: train the introspection models for each skill
 
 step-2: save the (lik_of_all_states, zhat) and (log_lik, zhat) pair data, for each time step, 
     lik_of_all_states should be a 1*K vector, 
@@ -28,8 +28,10 @@ import HMM.hmm_for_baxter_using_only_success_trials.training_config as training_
 import HMM.hmm_for_baxter_using_only_success_trials.util as util
 import HMM.hmm_for_baxter_using_only_success_trials.hmm_model_training as hmm_model_training
 import bnpy
+import hmmlearn
+from HMM.hmm_for_baxter_using_only_success_trials.log_likelihood_incremental_calculator import interface 
 
-DO_TRAINING = True
+DO_TRAINING = False
 
 colors  = ['r', 'g', 'b', 'g', 'c', 'm', 'y', 'k']
 markers = ['o', '+', '*', 's', 'x', '>', '<', '.']
@@ -157,19 +159,36 @@ def train_norminal_model():
         os.path.join(training_config.model_save_path, "model_s%s.pkl"%(1,)))
 
     model = best_model['model']
-    zHatBySeq, probBySeq, logBySeq = model.decode(x_train, lengths=lengths)
-    for nSeq in range(len(zHatBySeq)):
-        model.show_single_sequence(nSeq, zhat_T = zHatBySeq[nSeq])
-    _zhat = np.concatenate(zHatBySeq)
-    _prob = np.concatenate(probBySeq)
-    _log  = np.concatenate(logBySeq)
-    _zhat_prob_log = pd.DataFrame()
-    _zhat_prob_log['zhat'] =  _zhat
-    #calc_threshold_from_logsumexp_of_specific_zhat(_zhat_prob_log['zhat'].unique(), zHatBySeq, logBySeq)
-    _zhat_prob_log['log']  = _log
-    for k in range(_prob.shape[1]):
-        _zhat_prob_log['k_{0}'.format(k)] = _prob[:,k]
-    _zhat_prob_log.to_csv(training_config.model_save_path + '/zhat_prob_log.csv', index = False)
+    if issubclass(type(model), hmmlearn.hmm._BaseHMM):
+        calculator = interface.get_calculator(model)
+        log = []
+        for i in range(x_train.shape[0]):
+            sample = x_train[i,:].reshape(1,-1)
+            logsumlik = calculator.add_one_sample_and_get_loglik(sample)
+            log.append(logsumlik)
+            if i == 0:
+                first_val = logsumlik
+        log = [first_val] + np.diff(log).tolist()
+        _, state_sequence = model.decode(x_train)
+        _zhat_prob_log = pd.DataFrame()        
+        _zhat_prob_log['zhat'] =  state_sequence        
+        _zhat_prob_log['log']  = log
+        _zhat_prob_log.to_csv(training_config.model_save_path + '/zhat_log.csv', index = False)        
+    else:
+        zHatBySeq, probBySeq, logBySeq = model.decode(x_train, lengths=lengths)
+
+        for nSeq in range(len(zHatBySeq)):
+            model.show_single_sequence(nSeq, zhat_T = zHatBySeq[nSeq])
+        _zhat = np.concatenate(zHatBySeq)
+        _prob = np.concatenate(probBySeq)
+        _log  = np.concatenate(logBySeq)
+        _zhat_prob_log = pd.DataFrame()
+        _zhat_prob_log['zhat'] =  _zhat
+        #calc_threshold_from_logsumexp_of_specific_zhat(_zhat_prob_log['zhat'].unique(), zHatBySeq, logBySeq)
+        _zhat_prob_log['log']  = _log
+        for k in range(_prob.shape[1]):
+            _zhat_prob_log['k_{0}'.format(k)] = _prob[:,k]
+        _zhat_prob_log.to_csv(training_config.model_save_path + '/zhat_log.csv', index = False)
     return model, _zhat_prob_log
 
 def test_anomaly_detection_through_hidden_state(model, threshold_dict):
@@ -183,61 +202,82 @@ def test_anomaly_detection_through_hidden_state(model, threshold_dict):
             x = temp[i][1]
         else:
             x = np.concatenate((x, temp[i][1]), axis = 0)
-    '''
-    #1: get the logSoftEv (predict_prob) given current sample 
-    #2: estimate the zhat
-    #3: 
-    '''
-    prev_sample = None
-    for isampe in range(len(x)):
-        if prev_sample is None:
-            prev_sample = x[isampe]
-            continue
-        else:
-            test_sample = np.vstack((prev_sample, x[isampe]))
-            prev_sample = x[isampe]
-#            prev_sample += np.random.normal(0,5,prev_sample.shape) 
-        logSoftEv = model.get_emission_log_prob_matrix(test_sample)
-        log_startprob = np.log(model.model.allocModel.get_init_prob_vector())
-        log_transmat  = np.log(model.model.allocModel.get_trans_prob_matrix())        
-        zHat =  model.runViterbiAlg(logSoftEv, log_startprob, log_transmat)
-        try:
-            fmsg, margPrObs = bnpy.allocmodel.hmm.HMMUtil.FwdAlg(np.exp(log_startprob), np.exp(log_transmat), np.exp(logSoftEv))
-        except FloatingPointError:
-            pass
-        cur_loglik = np.log(margPrObs)
-        if cur_loglik[0] > threshold_dict[zHat[0]]:
-            print 'normal'
-        else:
-            print 'anomaly'
+            
+    if issubclass(type(model), hmmlearn.hmm._BaseHMM):
+        zhats = model.predict(x)
+        logliks = model.score(x)
+        for i in range(len(x)):
+            zhat = model.predict(x[i].reshape(1,-1))
+            curr_loglik = model.score(x[i].reshape(1,-1))
+            ipdb.set_trace()
+            if curr_loglik < threshold_dict[zhat[0]]:
+                print 'anomaly'
+            else:
+                print 'success'
+                
+    else:
+        prev_sample = None
+        for isampe in range(len(x)):
+            if prev_sample is None:
+                prev_sample = x[isampe]
+                continue
+            else:
+                test_sample = np.vstack((prev_sample, x[isampe]))
+                prev_sample = x[isampe]
+            logSoftEv = model.get_emission_log_prob_matrix(test_sample)
+            log_startprob = np.log(model.model.allocModel.get_init_prob_vector())
+            log_transmat  = np.log(model.model.allocModel.get_trans_prob_matrix())        
+            zHat =  model.runViterbiAlg(logSoftEv, log_startprob, log_transmat)
+            try:
+                fmsg, margPrObs = bnpy.allocmodel.hmm.HMMUtil.FwdAlg(np.exp(log_startprob), np.exp(log_transmat), np.exp(logSoftEv))
+            except FloatingPointError:
+                pass
+            cur_loglik = np.log(margPrObs)
+            if cur_loglik[0] > threshold_dict[zHat[0]]:
+                print 'normal'
+            else:
+                print 'anomaly'
             
 if __name__=="__main__":
     
     if DO_TRAINING:
         model, df = train_norminal_model()
     else:
-        df    = pd.read_csv(training_config.model_save_path + '/zhat_prob_log.csv', sep=',')
         model = joblib.load(training_config.model_save_path + "/model_s%s.pkl"%(1,))
+        df    = pd.read_csv(training_config.model_save_path + '/zhat_log.csv', sep=',')
+    print training_config.model_save_path
+    '''
     K = model.K
     k_id_list = ['k_{0}'.format(i) for i in range(K)]
     # for LSTM_FCN
     df[ ['zhat'] + k_id_list].to_csv('tag_3_x_train', header = False, index=False)
     df[ ['zhat'] + k_id_list].to_csv('tag_3_x_test', header = False, index=False)    
+    '''
 
     # plot
     threshold_dict = {}
-    for i, iz in enumerate(df['zhat'].unique().tolist()):
+    for i, iz in enumerate(sorted(df['zhat'].unique().tolist())):
         plt.subplot(len(df['zhat'].unique().tolist()), 1, i+1)
-        plt.plot(df['log'].loc[df['zhat'] == iz].values, marker = markers[i], color = colors[i], linestyle = 'None', label = iz)
+        plt.plot(df['log'].loc[df['zhat'] == iz].values, marker = markers[i], color = colors[i], linestyle = 'None', )
         zlog = df['log'].loc[df['zhat'] == iz].values
+
+        '''
+        zlog_min = zlog.min()
+        zlog_max = zlog.max()
+        threshold = zlog_min - (zlog_max - zlog_min)/2
+        '''
+        
         zlog_mean = np.mean(zlog)
         zlog_var  = np.var(zlog)
-        threshold = zlog_mean - 1.0 * zlog_var
+        threshold = zlog_mean - 2.0 * zlog_var
         threshold_dict[iz] = threshold
-        plt.axhline(threshold, linewidth=4, color = 'r')
+        
+        plt.axhline(threshold, color = 'r', linewidth=4, label='Threshold') 
+        plt.axhline(zlog_mean, linestyle='--', color = 'black', linewidth=2, label='Mean')       
         plt.title('Concatenate all the log-likelihood values of hidden state {0}'.format(iz))
         plt.legend()
-    np.save('threshold.npy', threshold_dict)
+    plt.show()
+    np.save(os.path.join(training_config.model_save_path, 'threshold.npy'), threshold_dict)
     test_anomaly_detection_through_hidden_state(model, threshold_dict)
 
     '''  

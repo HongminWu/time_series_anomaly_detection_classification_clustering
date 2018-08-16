@@ -3,6 +3,7 @@ import itertools
 import collections
 import matplotlib.pyplot as plt
 from util import KnnDtw, ProgressBar
+import ipdb
 
 if __name__=='__main__':
     
@@ -15,13 +16,13 @@ if __name__=='__main__':
     fig = plt.figure(figsize=(12,4))
     _ = plt.plot(time, amplitude_a, label='A')
     _ = plt.plot(time, amplitude_b, label='B')
-    _ = plt.title('DTW distance between A and B is %.2f' % distance)
+    _ = plt.title('Synthetic data: DTW distance between A and B is %.2f' % distance)
     _ = plt.ylabel('Amplitude')
     _ = plt.xlabel('Time')
     _ = plt.legend()
-    plt.show()
 
     #TEST-SyntheticData: Compute the distance between each pair of two collections of inputs
+    print "SyntheticData: Compute the distance between each pair of two collections of inputs"
     disMx = m._dist_matrix(np.random.random((4,50)), np.random.random((4,50)))
     print '\n'
     print disMx
@@ -33,7 +34,6 @@ if __name__=='__main__':
 
     x_test_file = open('data/UCI-HAR-Dataset/test/X_test.txt', 'r')
     y_test_file = open('data/UCI-HAR-Dataset/test/y_test.txt', 'r')
-
     # Create empty lists
     x_train = []
     y_train = []
@@ -63,6 +63,8 @@ if __name__=='__main__':
     x_test = np.array(x_test)
     y_test = np.array(y_test)
 
+    ipdb.set_trace()
+    
     # Visualizing sample observations from the HAR dataset
     plt.figure(figsize=(11,7))
     colors = ['#D62728','#2C9F2C','#FD7F23','#1F77B4','#9467BD',

@@ -1,6 +1,7 @@
 import numpy as np
-import util
+import HMM.hmm_for_baxter_using_only_success_trials.util as util
 from scipy.special import logsumexp
+import ipdb
 
 class HmmlearnModelIncrementalLoglikCalculator(object):
     def __init__(self, model):
@@ -24,7 +25,6 @@ class HmmlearnModelIncrementalLoglikCalculator(object):
                     self.work_buffer[i] = self.fwdlattice[-2, i] + self.log_transmat[i, j]
 
                 self.fwdlattice[-1, j] = logsumexp(self.work_buffer) + framelogprob[0, j]
-
         return logsumexp(self.fwdlattice[-1])
 
 def get_calculator(model):

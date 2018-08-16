@@ -1,0 +1,49 @@
+from tsfresh.examples.robot_execution_failures import download_robot_execution_failures, load_robot_execution_failures
+from pandas.core import datetools
+from tsfresh import select_features
+from tsfresh import extract_features
+from tsfresh import extract_relevant_features
+from tsfresh.utilities.dataframe_functions import impute
+from tsfresh.feature_extraction import ComprehensiveFCParameters
+import coloredlogs, logging
+coloredlogs.install()
+import ipdb
+
+logger = logging.getLogger()
+logger.setLevel(logging.DEBUG)
+formatter = logging.Formatter("%(asctime)s - %(levelname)s - %(message)s")
+fh = logging.FileHandler('tsfresh.log')
+fh.setLevel(logging.DEBUG)
+fh.setFormatter(formatter)
+logger.addHandler(fh)
+
+ch = logging.StreamHandler()
+ch.setLevel(logging.DEBUG)
+ch.setFormatter(formatter)
+logger.addHandler(ch)
+
+download_robot_execution_failures()
+timeseries, y = load_robot_execution_failures()
+
+ipdb.set_trace()
+
+# extract partical features
+settings = ComprehensiveFCParameters()
+fc_parameters = {
+    "length" : None,
+    "large_standard_deviation": [{"r": 0.05,}, {"r": 0.1}]}
+extracted_features = extract_features(timeseries, column_id='id', column_sort='time', default_fc_parameters = fc_parameters)
+ipdb.set_trace()
+
+# extract all features
+extracted_features = extract_features(timeseries, column_id='id', column_sort='time')
+# select only the relevant features
+impute(extracted_features)
+features_filtered = select_features(extracted_features, y)
+
+'''
+# extraction, imputing and filtering at the same time
+features_filtered = extract_relevant_features(timeseries, y, column_id = 'id', column_sort = 'time')
+'''
+
+logger.debug('Congratulations! We can use the features_filtered to train the classification models')
